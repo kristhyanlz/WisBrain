@@ -9,13 +9,14 @@ export default function Main() {
   const navigate = useNavigate();
   return (
       <>
-        <Barra/>
-        <Routes>
-          <Route path="/" element={<div>Hola mundo</div>}/>
-          <Route path='/FichaSociodemografica'    element={<FichaSociodemo/>} />
-          <Route path="/contacts/:name/:lastname" element={<Contact/>}/>
-          <Route path="*" element={<ErrorPage/>}/>
-        </Routes>
+        <Barra>
+          <Routes>
+            <Route path="/" element={<div>Hola mundo</div>}/>
+            <Route path='/FichaSociodemografica'    element={<FichaSociodemo/>} />
+            <Route path="/contacts/:name/:lastname" element={<Contact/>}/>
+            <Route path="*" element={<ErrorPage/>}/>
+          </Routes>
+        </Barra>
       </>
   );
 }

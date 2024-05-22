@@ -3,7 +3,7 @@ import { Formik } from 'formik';
 //import StyledGroupForm from '../components/StyledGroupForm';
 import { useNavigate } from 'react-router-dom';
 
-import {Box, FormControl, TextField, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container } from '@mui/material';
 
 
 const EDAD_MINIMA = 15
@@ -68,37 +68,77 @@ export default function FichaSociodemo () {
 
   return (
 
-    <div style={styles.form}>
+    <Container maxWidth='xs' style={styles.form}>
       <div style={styles.title}>
         Información Personal
       </div>
 
-      <FormControl fullWidth>
-        {/*<InputLabel htmlFor="my-input">Nombres completos</InputLabel>
-        <Input id="my-input" aria-describedby="my-helper-text" />
-  <FormHelperText id="my-helper-text">Nombres del paciente</FormHelperText>*/}
-        <TextField id="dni" label="DNI del paciente" style={{padding:10}} variant="filled"/>
-        <TextField id="nombres" label="Nombres del paciente" style={{padding:10}} variant="filled"/>
-        <TextField id="apellidos" label="Apellidos del paciente" style={{padding:10}} variant="filled"/>
+      <Box sx={{
+        marginTop: 8,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'}}>
+        {/*
+        <InputLabel htmlFor="nombres">Nombres</InputLabel>
+        <Input id="my-input" aria-describedby="helper-nombres" />
+  <FormHelperText id="helper-nombres">Nombres del paciente</FormHelperText>*/}
+        <Box component='form' sx={{ mt: 1}}>
 
-        
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={age}
-          label="Edad!"
-          onChange={handleChange}
-        >
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
-        </Select>
+          <TextField 
+            margin='normal'
+            required
+            fullWidth
+            id="dni" 
+            label="DNI del paciente"
+            name="dni"
+            autoFocus
+            style={{padding:10}}
+            variant="filled"
+          />
+          <TextField
+            margin='normal'
+            required
+            fullWidth 
+            id="nombres"
+            label="Nombres del paciente"
+            name="nombres"
+            style={{padding:10}}
+            variant="filled"
+          />
+          <TextField 
+            margin='normal'
+            required
+            fullWidth
+            id="apellidos"
+            label="Apellidos del paciente"
+            name='apellidos'
+            style={{padding:10}}
+            variant="filled"
+          />
 
-        <Box style={{paddingTop: 20}}>
-          <Button title="¡Adelante!" />
+          <FormControl fullWidth>
+            <InputLabel id="lbl-sexo">Sexo</InputLabel>        
+            <Select
+              labelId="lbl-sexo"
+              id="sexo"
+              value={age}
+              label="Sexo"
+              onChange={handleChange}
+            >
+              {
+                sexoOptions.map((ele) => 
+                  <MenuItem value={ele.key}>{ele.value}</MenuItem>
+                )
+              }
+            </Select>
+          </FormControl>
+
+          <Box style={{paddingTop: 20}}>
+            <Button title="¡Adelante!" />
+          </Box>
         </Box>
-      </FormControl>
+      </Box>
 
-    </div>
+    </Container>
   );
 }

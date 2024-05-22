@@ -34,7 +34,7 @@ const lightTheme = createTheme({
 const pages = ['Ficha Sociodemografica', 'Test', 'Resultados'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-function Barra() {
+function Barra( {children}) {
   const [currentTheme, setCurrentTheme] = React.useState('dark');
 
   const navigate = useNavigate();
@@ -169,6 +169,7 @@ function Barra() {
         </Toolbar>
       </Container>
     </AppBar>
+    {children}
     </ThemeProvider>
   );
 }
