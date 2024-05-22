@@ -56,6 +56,10 @@ function Barra( {children}) {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleClickPages = (link) => {
+    navigate(link)
+  }
   //<ThemeProvider theme={darkTheme}>
   return (
     <ThemeProvider theme={ (currentTheme == 'dark') ? darkTheme: lightTheme}>
@@ -112,7 +116,7 @@ function Barra( {children}) {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} onClick={handleClickPages}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}

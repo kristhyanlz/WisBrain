@@ -3,7 +3,12 @@ import { Formik } from 'formik';
 //import StyledGroupForm from '../components/StyledGroupForm';
 import { useNavigate } from 'react-router-dom';
 
-import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container } from '@mui/material';
+import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container, Grid } from '@mui/material';
+
+//DATE
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 
 const EDAD_MINIMA = 15
@@ -18,10 +23,13 @@ const styles = {
   },
   title:{
     textAlign: 'center',
-    fontSize: 40,
+    fontSize: 32,
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: 20,
     fontFamily: 'Candara',
+  },
+  formEle: {
+    padding: 10
   }
 };
 
@@ -70,11 +78,10 @@ export default function FichaSociodemo () {
 
     <Container maxWidth='xs' style={styles.form}>
       <div style={styles.title}>
-        Información Personal
+        Información del Paciente
       </div>
 
       <Box sx={{
-        marginTop: 8,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'}}>
@@ -89,10 +96,10 @@ export default function FichaSociodemo () {
             required
             fullWidth
             id="dni" 
-            label="DNI del paciente"
+            label="DNI"
             name="dni"
             autoFocus
-            style={{padding:10}}
+            style={styles.formEle}
             variant="filled"
           />
           <TextField
@@ -100,9 +107,9 @@ export default function FichaSociodemo () {
             required
             fullWidth 
             id="nombres"
-            label="Nombres del paciente"
+            label="Nombres"
             name="nombres"
-            style={{padding:10}}
+            style={styles.formEle}
             variant="filled"
           />
           <TextField 
@@ -110,32 +117,68 @@ export default function FichaSociodemo () {
             required
             fullWidth
             id="apellidos"
-            label="Apellidos del paciente"
+            label="Apellidos"
             name='apellidos'
-            style={{padding:10}}
+            style={styles.formEle}
             variant="filled"
           />
 
-          <FormControl fullWidth>
-            <InputLabel id="lbl-sexo">Sexo</InputLabel>        
-            <Select
-              labelId="lbl-sexo"
-              id="sexo"
-              value={age}
-              label="Sexo"
-              onChange={handleChange}
-            >
-              {
-                sexoOptions.map((ele) => 
-                  <MenuItem value={ele.key}>{ele.value}</MenuItem>
-                )
-              }
-            </Select>
+          <Box fullWidth style={styles.formEle}>
+            <FormControl fullWidth >
+              <InputLabel id="lbl-sexo">Sexo</InputLabel>        
+              <Select
+                labelId="lbl-sexo"
+                id="sexo"
+                value={age}
+                label="Sexo"
+                onChange={handleChange}
+              >
+                {
+                  sexoOptions.map((ele) => 
+                    <MenuItem value={ele.key}>{ele.value}</MenuItem>
+                  )
+                }
+              </Select>
+            </FormControl>
+          </Box>
+
+          <FormControl fullWidth style={styles.formEle}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
+              
+              <DatePicker label="Fecha de Nacimiento"/>
+            </LocalizationProvider>
           </FormControl>
 
-          <Box style={{paddingTop: 20}}>
-            <Button title="¡Adelante!" />
-          </Box>
+          <FormControl fullWidth style={styles.formEle}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
+              
+              <DatePicker label="Fecha de evaluacion"/>
+            </LocalizationProvider>
+          </FormControl>
+
+          <Grid container justifyContent='space-around'>
+            <Grid item>
+              <Button
+                type='submit'
+                variant='outlined'
+                sx={{ mt: 3, mb: 2}}
+              >
+                Guardar
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                type='submit'
+                variant='outlined'
+                sx={{ mt: 3, mb: 2}}
+              >
+                ¡Ir al test!
+              </Button>
+            </Grid>
+          </Grid>
+          
         </Box>
       </Box>
 
