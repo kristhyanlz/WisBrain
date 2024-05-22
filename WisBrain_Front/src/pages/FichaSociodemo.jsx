@@ -1,9 +1,9 @@
 import React from 'react';
 import { Formik } from 'formik';
-import StyledGroupForm from '../components/StyledGroupForm';
+//import StyledGroupForm from '../components/StyledGroupForm';
 import { useNavigate } from 'react-router-dom';
 
-import { Button } from '@mui/material';
+import {Box, FormControl, TextField, InputLabel, Select, MenuItem, Button } from '@mui/material';
 
 
 const EDAD_MINIMA = 15
@@ -59,7 +59,12 @@ const sexoOptions = [
 ];
 
 export default function FichaSociodemo () {
+  const [age, setAge] = React.useState('');
   const navigate = useNavigate();
+
+  const handleChange = (event) => {
+    setAge(event.target.value);
+  };
 
   return (
 
@@ -68,28 +73,32 @@ export default function FichaSociodemo () {
         Información Personal
       </div>
 
-      <Formik
-        validate = { validate }
-        initialValues = { initialValues }
-        onSubmit = {
-          (values) => {
-            //console.log("Send btn ficha:\n" +JSON.stringify(values, null, 4))//Nombres, edad, sexo
-            
-          } 
-        }
-      >
-        {({ handleChange, handleBlur, handleSubmit, values }) => (
-          <>
-            <StyledGroupForm label='Nombres' placeholder='Nombres' name='nombres' />
-            <StyledGroupForm label='Edad' placeholder='123' name='edad' keyboardType="numeric"/>
-            <StyledGroupForm label='Sexo' placeholder='Seleccione su sexo' name='sexo' select={sexoOptions}/>
+      <FormControl fullWidth>
+        {/*<InputLabel htmlFor="my-input">Nombres completos</InputLabel>
+        <Input id="my-input" aria-describedby="my-helper-text" />
+  <FormHelperText id="my-helper-text">Nombres del paciente</FormHelperText>*/}
+        <TextField id="dni" label="DNI del paciente" style={{padding:10}} variant="filled"/>
+        <TextField id="nombres" label="Nombres del paciente" style={{padding:10}} variant="filled"/>
+        <TextField id="apellidos" label="Apellidos del paciente" style={{padding:10}} variant="filled"/>
 
-          <div style={{paddingTop: 20}}>
-            <Button onPress={handleSubmit} title="¡Adelante!" />
-          </div>
-          </>
-        )}
-      </Formik>
+        
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={age}
+          label="Edad!"
+          onChange={handleChange}
+        >
+          <MenuItem value={10}>Ten</MenuItem>
+          <MenuItem value={20}>Twenty</MenuItem>
+          <MenuItem value={30}>Thirty</MenuItem>
+        </Select>
+
+        <Box style={{paddingTop: 20}}>
+          <Button title="¡Adelante!" />
+        </Box>
+      </FormControl>
+
     </div>
   );
 }

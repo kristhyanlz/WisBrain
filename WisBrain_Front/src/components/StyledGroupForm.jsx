@@ -36,7 +36,7 @@ const StyledGroupForm = ({ style = {}, label, placeholder, name, keyboardType='d
       placeholder={placeholder}
       searchPlaceholder={placeholder}
       boxStyles={meta.error && {borderColor: 'red'}}
-      setSelected={(val) => {
+      onChange={(val) => {
         helpers.setValue(val);
       }}
       data = {select}
@@ -45,10 +45,9 @@ const StyledGroupForm = ({ style = {}, label, placeholder, name, keyboardType='d
     <StyledTextInput
       error = {meta.error}
       placeholder={placeholder}
-      onChangeText={text => helpers.setValue(text)}
+      onChange={text => helpers.setValue(text)}
       onBlur={() => helpers.setTouched(true)}
       value={field.value}
-      keyboardType={keyboardType}
     />
   return(
     <div style={styles.groupForm} {...props}>
