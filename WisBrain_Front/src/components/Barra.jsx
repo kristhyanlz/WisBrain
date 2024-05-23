@@ -31,7 +31,11 @@ const lightTheme = createTheme({
   },
 });
 
-const pages = ['Ficha Sociodemografica', 'Test', 'Resultados'];
+const pages = [
+  {text: 'Ficha Sociodemografica', link: '/FichaSociodemografica'},
+  {text: 'Test', link: '/Text'},
+  {text: 'Resultados', link:'/Resultados'},
+];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Barra( {children}) {
@@ -45,19 +49,13 @@ function Barra( {children}) {
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
-
   const handleClickPages = (link) => {
+    handleCloseNavMenu()
     navigate(link)
   }
   //<ThemeProvider theme={darkTheme}>
@@ -115,9 +113,10 @@ function Barra( {children}) {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleClickPages}>
-                  <Typography textAlign="center">{page}</Typography>
+              {//Estrecho, flotante
+              pages.map((ele) => (
+                <MenuItem key={ele.text} onClick={() => { handleClickPages(ele.link)}}>
+                  <Typography textAlign="center">{ele.text}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -143,13 +142,14 @@ function Barra( {children}) {
             WisBrain {/*Nombre del Proyecto*/}
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
+            {//Fullscreen
+            pages.map((ele) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+                key={ele.text}
+                onClick={() => { handleClickPages(ele.link)}}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                {page}
+                {ele.text}
               </Button>
             ))}
           </Box>

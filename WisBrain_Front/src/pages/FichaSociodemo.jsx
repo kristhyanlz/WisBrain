@@ -135,7 +135,7 @@ export default function FichaSociodemo () {
               >
                 {
                   sexoOptions.map((ele) => 
-                    <MenuItem value={ele.key}>{ele.value}</MenuItem>
+                    <MenuItem key={ele.key} value={ele.key}>{ele.value}</MenuItem>
                   )
                 }
               </Select>
