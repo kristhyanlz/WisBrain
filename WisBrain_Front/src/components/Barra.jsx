@@ -33,7 +33,7 @@ const lightTheme = createTheme({
 
 const pages = [
   {text: 'Ficha Sociodemografica', link: '/FichaSociodemografica'},
-  {text: 'Test', link: '/Text'},
+  {text: 'Test', link: '/Test'},
   {text: 'Resultados', link:'/Resultados'},
 ];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
