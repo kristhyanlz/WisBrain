@@ -32,9 +32,11 @@ const lightTheme = createTheme({
 });
 
 const pages = [
+  {text: 'Historial', link:'/Pacientes'},
   {text: 'Ficha Sociodemografica', link: '/FichaSociodemografica'},
   {text: 'Test', link: '/Test'},
   {text: 'Resultados', link:'/Resultados'},
+  
 ];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 

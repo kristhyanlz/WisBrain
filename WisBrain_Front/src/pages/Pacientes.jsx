@@ -46,7 +46,7 @@ const columns = [
             >
               Edit
             </Button>
-            <Button
+            <Button color='error'
               onClick={(e) => {
                 const { data } = this.state;
                 data.shift();
@@ -54,6 +54,15 @@ const columns = [
               }}
             >
               Delete
+            </Button>
+            <Button color="secondary" variant="outlined" style={{margin: '0 0 0 10px'}}
+              onClick={(e) => {
+                const { data } = this.state;
+                data.shift();
+                this.setState({ data });
+              }}
+            >
+              Test
             </Button>
           </>
         );
