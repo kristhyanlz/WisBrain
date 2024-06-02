@@ -7,7 +7,7 @@ import { red } from '@mui/material/colors';
 
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 
-const BACK_URL = "localhost:5000"
+const BACK_URL = "http://localhost:5000"
 
 const styles = {
   title:{
@@ -33,7 +33,30 @@ const columns = [
 
 export default function Test() {
 
-  const [movimientos, setMovimientos] = useState(null)
+  const [movimientos, setMovimientos] = useState([
+    {
+      "categoria": "NÚMERO",
+      "datos_tarjeta": {
+        "categoria": "NÚMERO",
+        "color": "rojo",
+        "forma": "cruz",
+        "numero": 4
+      },
+      "id": 1,
+      "resultado": "CORRECTO"
+    },
+    {
+      "categoria": "NÚMERO",
+      "datos_tarjeta": {
+        "categoria": "OTRO",
+        "color": "azul",
+        "forma": "triangulo",
+        "numero": 2
+      },
+      "id": 2,
+      "resultado": "INCORRECTO"
+    }
+  ])
   const [flag, setFlag] = useState(false)
 
   useEffect(()=> {
@@ -41,6 +64,7 @@ export default function Test() {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
         .then((movs) => {
+          console.log(JSON.stringify(movs) )
           setMovimientos(movs)
         })
     }, 500)
@@ -66,7 +90,9 @@ export default function Test() {
         <Button
           variant='contained'
           endIcon={<CropSquareIcon/>}
-          onClick={fetch(`${BACK_URL}/resume`)}  
+          onClick={() => {
+            fetch(`${BACK_URL}/resume`);
+          }}  
         >
           Dispensar
         </Button>
