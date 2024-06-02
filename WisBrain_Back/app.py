@@ -7,7 +7,7 @@ from Tarjetas import Tarjetas
 app = Flask(__name__)
 
 # Inicializar la clase Arduino, Tarjetas y Validador
-arduino = Arduino('COM3')
+arduino = Arduino('/dev/ttyUSB0')
 tarjetas = Tarjetas()
 validador = Validador(tarjetas)
 resultado = []

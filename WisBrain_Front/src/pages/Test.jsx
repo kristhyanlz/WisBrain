@@ -3,9 +3,11 @@ import {useState, useEffect} from 'react'
 import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import { red } from '@mui/material/colors';
 
-import {movimientos} from './dataMovimientos'
+//import {movimientos} from './dataMovimientos'
 
 import CropSquareIcon from '@mui/icons-material/CropSquare';
+
+const BACK_URL = "localhost:5000"
 
 const styles = {
   title:{
@@ -30,6 +32,20 @@ const columns = [
 ];
 
 export default function Test() {
+
+  const [movimientos, setMovimientos] = useState(null)
+  const [flag, setFlag] = useState(false)
+
+  useEffect(()=> {
+    const interval = setInterval(()=> {
+      fetch(`${BACK_URL}/getUpdate`)
+        .then((res) => res.json())
+        .then((movs) => {
+          setMovimientos(movs)
+        })
+    }, 500)
+  }, [flag])
+
   return (
     <Paper fixed fullWidth>
       <Box style={styles.title}>
@@ -47,7 +63,11 @@ export default function Test() {
         </Grid>
       </Grid>
       <Box style={{textAlign: 'center', paddingBottom: 20}}>
-        <Button variant='contained' endIcon={<CropSquareIcon/>} >
+        <Button
+          variant='contained'
+          endIcon={<CropSquareIcon/>}
+          onClick={fetch(`${BACK_URL}/resume`)}  
+        >
           Dispensar
         </Button>
       </Box>
