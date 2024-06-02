@@ -5,6 +5,8 @@ from arduino2 import Arduino
 from Validador import Validador
 from Tarjetas import Tarjetas
 
+#python -m flask run
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
