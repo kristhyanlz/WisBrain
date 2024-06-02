@@ -28,6 +28,7 @@ escucha_thread.start()
 def hello_world():
     return 'Hello Wis!'
 
+
 @app.route('/getUpdate', methods=['GET'])
 def get_update():
     global arduino, resultado
