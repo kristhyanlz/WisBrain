@@ -5,6 +5,8 @@ import { red } from '@mui/material/colors';
 
 import {movimientos} from './dataMovimientos'
 
+import CropSquareIcon from '@mui/icons-material/CropSquare';
+
 const styles = {
   title:{
     textAlign: 'center',
@@ -44,6 +46,11 @@ export default function Test() {
           <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Número') ? false : true} style={styles.cat}>NÚMERO</Button>
         </Grid>
       </Grid>
+      <Box style={{textAlign: 'center', paddingBottom: 20}}>
+        <Button variant='contained' endIcon={<CropSquareIcon/>} >
+          Dispensar
+        </Button>
+      </Box>
 
       <Paper sx={{ width: '100%' }}>
         <TableContainer sx={{ maxHeight: 440 }}>
