@@ -10,7 +10,7 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Inicializar la clase Arduino, Tarjetas y Validador
-arduino = Arduino('COM5')
+arduino = Arduino('/dev/ttyUSB0')
 tarjetas = Tarjetas()
 validador = Validador(tarjetas)
 resultado = []

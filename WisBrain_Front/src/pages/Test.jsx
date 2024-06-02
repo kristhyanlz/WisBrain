@@ -35,39 +35,30 @@ export default function Test() {
 
   const [movimientos, setMovimientos] = useState([
     {
-      "categoria": "NÚMERO",
+      "categoria": "",
       "datos_tarjeta": {
-        "categoria": "NÚMERO",
-        "color": "rojo",
-        "forma": "cruz",
-        "numero": 4
+        "categoria": "",
+        "color": "",
+        "forma": "",
+        "numero": 0
       },
-      "id": 1,
-      "resultado": "CORRECTO"
-    },
-    {
-      "categoria": "NÚMERO",
-      "datos_tarjeta": {
-        "categoria": "OTRO",
-        "color": "azul",
-        "forma": "triangulo",
-        "numero": 2
-      },
-      "id": 2,
-      "resultado": "INCORRECTO"
-    }
+      "id": "",
+      "resultado": ""
+    }
   ])
   const [flag, setFlag] = useState(false)
 
   useEffect(()=> {
-    const interval = setInterval(()=> {
+    const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
-        .then((movs) => {
-          console.log(JSON.stringify(movs) )
-          setMovimientos(movs)
+        .then(async(movs) => {
+          await console.log(JSON.stringify(movs) )
+          if (movs.length > 0){
+            setMovimientos(movs)
+          }
         })
-    }, 500)
+    }, 1000)
   }, [flag])
 
   return (
