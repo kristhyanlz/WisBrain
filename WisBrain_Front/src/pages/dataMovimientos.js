@@ -1,4 +1,29 @@
 export const movimientos = [
+  {
+    "categoria": "Número",
+    "datos_tarjeta": {
+      "categoria": "Número",
+      "color": "rojo",
+      "forma": "cruz",
+      "numero": 4
+    },
+    "id": 1,
+    "resultado": "CORRECTO"
+  },
+  {
+    "categoria": "Número",
+    "datos_tarjeta": {
+      "categoria": "Otro",
+      "color": "azul",
+      "forma": "triangulo",
+      "numero": 2
+    },
+    "id": 2,
+    "resultado": "INCORRECTO"
+  }
+]
+
+/*export const movimientos = [
   {"nTarjeta": 1, "respuesta": "Correcta", "categoria": "FORMA"},
   {"nTarjeta": 2, "respuesta": "Incorrecta", "categoria": "COLOR"},
   {"nTarjeta": 3, "respuesta": "Perseverativa", "categoria": "FORMA"},
@@ -30,3 +55,5 @@ export const movimientos = [
   {"nTarjeta": 29, "respuesta": "Perseverativa", "categoria": "FORMA"},
   {"nTarjeta": 30, "respuesta": "Perseverativa", "categoria": "NÚMERO"}
 ]
+
+*/

@@ -1,16 +1,19 @@
+import { Box } from "@mui/material";
 import { useRouteError } from "react-router-dom";
 
 export default function ErrorPage() {
-  const error = useRouteError();
-  console.error(error);
+  //const error = useRouteError();
+  //console.error(error);
 
   return (
-    <div id="error-page">
-      <h1>Oops!</h1>
-      <p>Sorry, an unexpected error has occurred.</p>
+    <Box id="error-page">
+      <h1>
+        ¡Vaya!
+      </h1>
       <p>
-        <i>{error.statusText || error.message}</i>
+        Lo sentimos, la dirección no se encuentra disponible.
       </p>
-    </div>
+        {/*<i>{error.statusText || error.message}</i>*/}
+    </Box>
   );
 }

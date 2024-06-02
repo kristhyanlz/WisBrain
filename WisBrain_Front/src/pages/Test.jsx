@@ -1,5 +1,7 @@
 import * as React from 'react';
+import {useState, useEffect} from 'react'
 import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
+import { red } from '@mui/material/colors';
 
 import {movimientos} from './dataMovimientos'
 
@@ -20,12 +22,12 @@ const styles = {
 }
 
 const columns = [
-  {id: 'nTarjeta', label: '# Tarjeta', align: 'center'},
-  {id: 'respuesta', label: 'Respuesta', minWidth: 170, align: 'center'  },
-  { id: 'categoria', label: 'Categoria', minWidth: 100, align:'center', /*format: (value) => value.toLocaleString('en-US'), format: (value) => value.toFixed(2)*/ },
+  {id: 'id', label: '# Tarjeta', align: 'center'},
+  {id: 'resultado', label: 'Respuesta', minWidth: 170, align: 'center'  },
+  {id: 'categoria', label: 'Categoría', minWidth: 100, align: 'center' },
 ];
 
-export default function ColumnGroupingTable() {
+export default function Test() {
   return (
     <Paper fixed fullWidth>
       <Box style={styles.title}>
@@ -33,13 +35,13 @@ export default function ColumnGroupingTable() {
       </Box>
       <Grid container  justifyContent='center'>
         <Grid style={styles.catEsperadas}>
-          <Button disabled style={styles.cat}>COLOR</Button>
+          <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Color') ? false : true} style={styles.cat}>COLOR</Button>
         </Grid>
         <Grid style={styles.catEsperadas}>
-          <Button disabled style={styles.cat}>FORMA</Button>
+          <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Forma') ? false : true} style={styles.cat}>FORMA</Button>
         </Grid>
         <Grid style={styles.catEsperadas}>
-          <Button style={styles.cat}>NÚMERO</Button>
+          <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Número') ? false : true} style={styles.cat}>NÚMERO</Button>
         </Grid>
       </Grid>
 
@@ -61,23 +63,27 @@ export default function ColumnGroupingTable() {
             </TableHead>
             
             <TableBody>
-              {movimientos
-                .map((row) => {
+              {
+              movimientos.map((row) => {
                   return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                      {columns.map((column) => {
-                        const value = row[column.id];
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                      {
+                      columns.map((column) => {
+                        const value = (column.id == 'categoria')? row.datos_tarjeta.categoria :row[column.id];
+                        let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
                         return (
                           <TableCell key={column.id} align={column.align}>
-                            {column.format && typeof value === 'number'
-                              ? column.format(value)
-                              : value}
+                            <Box sx={es_incorrecto && {color:red[500]}}>
+                              {value}
+                            </Box>
                           </TableCell>
                         );
-                      })}
+                      })
+                      }
                     </TableRow>
                   );
-                })}
+                })
+              }
             </TableBody>
           </Table>
         </TableContainer>
