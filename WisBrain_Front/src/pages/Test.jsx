@@ -5,6 +5,9 @@ import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
 
+import correctoAudio from  '../assets/correcto.mp3'
+import incorrectoAudio from '../assets/incorrecto.mp3'
+
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 
 const BACK_URL = "http://localhost:5000"
@@ -32,6 +35,9 @@ const columns = [
 ];
 
 export default function Test() {
+  const [correctoPlayer] = useState(new Audio( correctoAudio ))
+  const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
+
 
   const [movimientos, setMovimientos] = useState([
     {
@@ -46,8 +52,8 @@ export default function Test() {
       "resultado": ""
     }
   ])
+  
   const [flag, setFlag] = useState(false)
-
   useEffect(()=> {
     const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
@@ -56,10 +62,24 @@ export default function Test() {
           await console.log(JSON.stringify(movs) )
           if (movs.length > 0){
             setMovimientos(movs)
+            if (flagPlayer < movs.length){
+              setFlagPlayer(movs.length)
+            }
           }
         })
     }, 1000)
   }, [flag])
+
+  const [flagPlayer, setFlagPlayer] = useState(0)
+  useEffect(()=> {
+    if (movimientos[0].categoria != ""){
+      if (movimientos[movimientos.length - 1].resultado == "CORRECTO"){
+        correctoPlayer.play()
+      }else{
+        incorrectoPlayer.play()
+      }
+    }
+  }, [flagPlayer])
 
   return (
     <Paper fixed fullWidth>
