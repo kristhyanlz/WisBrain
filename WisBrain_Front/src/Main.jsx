@@ -9,6 +9,7 @@ import Barra from "./components/Barra";
 import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 
 import Test from './pages/Test'
+import Pruebas from "./pages/Pruebas";
 
 export default function Main() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function Main() {
             <Route path='/Resultados'    element={<Resultados/>} />
             <Route path='/Pacientes'    element={<Pacientes/>} />
             <Route path="/contacts/:name/:lastname" element={<Contact/>}/>
+            <Route path="/Pruebas" element={<Pruebas/>}/>
             <Route path="/error" element={<ErrorPage/>} />
             <Route path="*" element={<ErrorPage/> } />
           </Routes>

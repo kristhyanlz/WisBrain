@@ -1,13 +1,18 @@
 from flask import Flask, jsonify
+from flask_cors import CORS, cross_origin
 from threading import Thread
 from arduino2 import Arduino
 from Validador import Validador
 from Tarjetas import Tarjetas
 
+#python -m flask run
+
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Inicializar la clase Arduino, Tarjetas y Validador
-arduino = Arduino('COM5')
+arduino = Arduino('/dev/ttyUSB0')
 tarjetas = Tarjetas()
 validador = Validador(tarjetas)
 resultado = []
@@ -25,10 +30,12 @@ escucha_thread = Thread(target=iniciar_escucha)
 escucha_thread.start()
 
 @app.route('/', methods=['GET'])
+@cross_origin()
 def hello_world():
     return 'Hello Wis!'
 
 @app.route('/getUpdate', methods=['GET'])
+@cross_origin()
 def get_update():
     global arduino, resultado
     resultado = arduino.resultados_validacion
@@ -36,6 +43,7 @@ def get_update():
     return jsonify(resultado)
 
 @app.route('/resume', methods=['GET'])
+@cross_origin()
 def resume():
     global arduino
     arduino.lock = False

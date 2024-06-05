@@ -5,9 +5,12 @@ import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
 
+import correctoAudio from  '../assets/correcto.mp3'
+import incorrectoAudio from '../assets/incorrecto.mp3'
+
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 
-const BACK_URL = "localhost:5000"
+const BACK_URL = "http://localhost:5000"
 
 const styles = {
   title:{
@@ -32,19 +35,51 @@ const columns = [
 ];
 
 export default function Test() {
+  const [correctoPlayer] = useState(new Audio( correctoAudio ))
+  const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
 
-  const [movimientos, setMovimientos] = useState(null)
+
+  const [movimientos, setMovimientos] = useState([
+    {
+      "categoria": "",
+      "datos_tarjeta": {
+        "categoria": "",
+        "color": "",
+        "forma": "",
+        "numero": 0
+      },
+      "id": "",
+      "resultado": ""
+    }
+  ])
+  
   const [flag, setFlag] = useState(false)
-
   useEffect(()=> {
-    const interval = setInterval(()=> {
+    const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
-        .then((movs) => {
-          setMovimientos(movs)
+        .then(async(movs) => {
+          await console.log(JSON.stringify(movs) )
+          if (movs.length > 0){
+            setMovimientos(movs)
+            if (flagPlayer < movs.length){
+              setFlagPlayer(movs.length)
+            }
+          }
         })
-    }, 500)
+    }, 1000)
   }, [flag])
+
+  const [flagPlayer, setFlagPlayer] = useState(0)
+  useEffect(()=> {
+    if (movimientos[0].categoria != ""){
+      if (movimientos[movimientos.length - 1].resultado == "CORRECTO"){
+        correctoPlayer.play()
+      }else{
+        incorrectoPlayer.play()
+      }
+    }
+  }, [flagPlayer])
 
   return (
     <Paper fixed fullWidth>
@@ -66,7 +101,9 @@ export default function Test() {
         <Button
           variant='contained'
           endIcon={<CropSquareIcon/>}
-          onClick={fetch(`${BACK_URL}/resume`)}  
+          onClick={() => {
+            fetch(`${BACK_URL}/resume`);
+          }}  
         >
           Dispensar
         </Button>
