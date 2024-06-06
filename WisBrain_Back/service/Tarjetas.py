@@ -1,4 +1,4 @@
-import tarjetas_bd
+from bd import tarjetas_bd
 
 class Tarjetas:
     def __init__(self):
