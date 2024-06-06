@@ -1,9 +1,9 @@
 from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 from threading import Thread
-from arduino2 import Arduino
-from Validador import Validador
-from Tarjetas import Tarjetas
+from service.Arduino import Arduino
+from service.Validador import Validador
+from service.Tarjetas import Tarjetas
 
 #python -m flask run
 
@@ -12,7 +12,7 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Inicializar la clase Arduino, Tarjetas y Validador
-arduino = Arduino('/dev/ttyUSB0')
+arduino = Arduino('COM5')
 tarjetas = Tarjetas()
 validador = Validador(tarjetas)
 resultado = []
