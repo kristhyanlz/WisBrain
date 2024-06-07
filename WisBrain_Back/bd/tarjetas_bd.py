@@ -1,5 +1,5 @@
 import sqlite3
-con = sqlite3.connect('bdWisBrain.db')
+con = sqlite3.connect('WisBrain_Back/bd/bdWisBrain.db')
 
 cursor = con.cursor()
 query = "SELECT * FROM tarjeta WHERE numero_tarjeta in ('a', 'b', 'c', 'd');"
