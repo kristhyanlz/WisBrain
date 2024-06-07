@@ -42,6 +42,7 @@ def get_update():
     # Devuelve la lista completa de resultados
     return jsonify(resultado)
 
+# Podria ser a al revez.
 @app.route('/resume', methods=['GET'])
 @cross_origin()
 def resume():
