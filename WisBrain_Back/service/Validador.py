@@ -1,3 +1,4 @@
+import simpleaudio as sa
 class Validador:
     def __init__(self, tarjetas):
         self.tarjetas = tarjetas
@@ -17,6 +18,9 @@ class Validador:
                 "categoria": "PENDIENTE",
             }
         }
+        self.audioCorrecto = sa.WaveObject.from_wave_file("WisBrain_Back/assets/correcto.wav")
+        self.audioIncorrecto = sa.WaveObject.from_wave_file("WisBrain_Back/assets/incorrecto.wav")
+        self.audioCambio = sa.WaveObject.from_wave_file("WisBrain_Back/assets/cambio.wav")
 
     def validar(self, posicionTarjeta):
         self.resultado['id'] = self.index_movimiento + 1
@@ -25,11 +29,27 @@ class Validador:
         if self.formaActualOrdenamiento is not None and self.limiteMovimientosCorrectos < 6:
             print("1")
             veredicto = self.correctoOincorrecto(posicionTarjeta)
+            # if self.limiteMovimientosCorrectos == 6:
+                # play_obj = self.audioCambio.play()
+                #   |play_obj.wait_done()
         else:
             print("2")
             self.actualizarFormaOrdenamiento(posicionTarjeta)
             print("Forma actualizada de ordenamieto", self.formaActualOrdenamiento)
+            # play_obj = self.audioCambio.play()
+            # play_obj.wait_done()
             veredicto = self.correctoOincorrecto(posicionTarjeta)
+
+        if veredicto is 'CORRECTO':
+            play_obj = self.audioCorrecto.play()
+        else:
+            play_obj = self.audioIncorrecto.play()
+
+        play_obj.wait_done()
+
+        if self.limiteMovimientosCorrectos == 6:
+            play_obj = self.audioCambio.play()
+            play_obj.wait_done()
 
         self.resultado['resultado'] = veredicto
         self.resultado['categoria'] = self.formaActualOrdenamiento

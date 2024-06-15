@@ -1,6 +1,5 @@
 import serial
 
-
 class Arduino:
     def __init__(self, port, baud_rate=9600):
         self.puerto_serial = serial.Serial(port, baud_rate)
@@ -19,6 +18,7 @@ class Arduino:
             print("Datos recibidos:", datos_recibidos)
             if not self.lock:
                 self.procesar_dato(datos_recibidos, validador)
+
                 print("Resultados", self.resultados_validacion)
             else:
                 print("En espera")

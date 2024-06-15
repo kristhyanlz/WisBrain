@@ -35,8 +35,8 @@ const columns = [
 ];
 
 export default function Test() {
-  const [correctoPlayer] = useState(new Audio( correctoAudio ))
-  const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
+  //const [correctoPlayer] = useState(new Audio( correctoAudio ))
+  //const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
 
 
   const [movimientos, setMovimientos] = useState([
@@ -72,13 +72,14 @@ export default function Test() {
 
   const [flagPlayer, setFlagPlayer] = useState(0)
   useEffect(()=> {
-    if (movimientos[0].categoria != ""){
+    /*if (movimientos[0].categoria != ""){
       if (movimientos[movimientos.length - 1].resultado == "CORRECTO"){
         correctoPlayer.play()
       }else{
         incorrectoPlayer.play()
       }
     }
+      */
   }, [flagPlayer])
 
   return (
@@ -105,7 +106,7 @@ export default function Test() {
             fetch(`${BACK_URL}/resume`);
           }}  
         >
-          Dispensar
+          Siguiente
         </Button>
       </Box>
 
