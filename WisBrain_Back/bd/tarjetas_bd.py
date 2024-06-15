@@ -20,3 +20,11 @@ def devolverTarjetasBase():
 
 def devolverTarjetasOriginales():
     return TarjetasOriginales
+
+def insertarPaciente():
+    pass
+def insertarHistorialTestPaciente():
+    pass
+
+
+
