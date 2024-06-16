@@ -1,6 +1,8 @@
-from bd import tarjetas_bd
+from WisBrain_Back.bd.DataHelper import DataHelper
+
 
 class Tarjetas:
     def __init__(self):
-        self.tarjetasBase = tarjetas_bd.devolverTarjetasBase()
-        self.tarjetasPaciente = tarjetas_bd.devolverTarjetasOriginales()
+        self.dbHelper = DataHelper()
+        self.tarjetasBase = self.dbHelper.obtenerTarjetasBase()
+        self.tarjetasPaciente = self.dbHelper.obtenerTarjetasOriginales()
