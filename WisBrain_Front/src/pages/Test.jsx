@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import { red } from '@mui/material/colors';
 
@@ -8,7 +8,7 @@ import { red } from '@mui/material/colors';
 import correctoAudio from  '../assets/correcto.mp3'
 import incorrectoAudio from '../assets/incorrecto.mp3'
 
-import CropSquareIcon from '@mui/icons-material/CropSquare';
+import ContinuarIcon from '@mui/icons-material/PlayArrow';
 
 const BACK_URL = "http://localhost:5000"
 
@@ -38,6 +38,8 @@ export default function Test() {
   const [correctoPlayer] = useState(new Audio( correctoAudio ))
   const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
 
+  const tableRef = useRef(null);
+
 
   const [movimientos, setMovimientos] = useState([
     {
@@ -64,6 +66,7 @@ export default function Test() {
             setMovimientos(movs)
             if (flagPlayer < movs.length){
               setFlagPlayer(movs.length)
+              tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
             }
           }
         })
@@ -100,17 +103,17 @@ export default function Test() {
       <Box style={{textAlign: 'center', paddingBottom: 20}}>
         <Button
           variant='contained'
-          endIcon={<CropSquareIcon/>}
+          endIcon={<ContinuarIcon/>}
           onClick={() => {
             fetch(`${BACK_URL}/resume`);
           }}  
         >
-          Dispensar
+          Continuar
         </Button>
       </Box>
 
       <Paper sx={{ width: '100%' }}>
-        <TableContainer sx={{ maxHeight: 440 }}>
+        <TableContainer sx={{ maxHeight: 440 }} ref={tableRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
