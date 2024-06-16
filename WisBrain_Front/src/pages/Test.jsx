@@ -10,7 +10,8 @@ import incorrectoAudio from '../assets/incorrecto.mp3'
 
 import ContinuarIcon from '@mui/icons-material/PlayArrow';
 
-const BACK_URL = "http://localhost:5000"
+//const BACK_URL = "http://localhost:5000"
+import BACK_URL from './backURL';
 
 const styles = {
   title:{

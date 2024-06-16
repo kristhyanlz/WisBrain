@@ -11,6 +11,11 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
+//TOAST
+import { ToastContainer, toast } from 'react-toastify';
+
+//BACK URL
+import BACK_URL from './backURL';
 
 const EDAD_MINIMA = 15
 const EDAD_MAXIMA = 21
@@ -169,30 +174,29 @@ export default function FichaSociodemo () {
             </LocalizationProvider>
           </FormControl>
 
-          <Grid container justifyContent='space-around'>
-            <Grid item>
-              <Button
-                type='submit'
-                variant='outlined'
-                sx={{ mt: 3, mb: 2}}
-              >
-                Guardar
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                type='submit'
-                variant='outlined'
-                sx={{ mt: 3, mb: 2}}
-              >
-                ¡Ir al test!
-              </Button>
-            </Grid>
-          </Grid>
+          <Box sx={{display: 'flex', justifyContent: 'center'}}>
+            <Button
+              type='submit'
+              variant='outlined'
+              sx={{ mt: 3, mb: 2}}
+              onClick={async()=> {
+                const rpta = await fetch(`${BACK_URL}/insertar_paciente`, {
+                  method: 'POST',
+                  headers: {
+                    Accept: "application/json",
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(reg)
+                })
+              }}
+            >
+              ¡Ir al test!
+            </Button>
+          </Box>
           
         </Box>
       </Box>
-
+      <ToastContainer />
     </Container>
   );
 }
