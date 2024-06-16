@@ -40,7 +40,6 @@ export default function Test() {
 
   const tableRef = useRef(null);
 
-
   const [movimientos, setMovimientos] = useState([
     {
       "categoria": "",
@@ -57,6 +56,7 @@ export default function Test() {
   
   const [flag, setFlag] = useState(false)
   useEffect(()=> {
+    
     const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
@@ -71,6 +71,7 @@ export default function Test() {
           }
         })
     }, 1000)
+    
   }, [flag])
 
   const [flagPlayer, setFlagPlayer] = useState(0)
@@ -84,8 +85,28 @@ export default function Test() {
     }
   }, [flagPlayer])
 
+  const continuarFx = () => {
+    console.log("CONTINUAR")
+    fetch(`${BACK_URL}/resume`);
+  }
+
+  const spaceKeyListener = React.useCallback((event) => {
+    if (event.key == " "){
+      console.log(`Tecla espacio`)
+      continuarFx();
+    }
+  }, [])
+
+  useEffect(() => {
+    document.addEventListener("keydown", spaceKeyListener, false);
+
+    return () => {
+      document.removeEventListener("keydown", spaceKeyListener, false);
+    };
+  }, [spaceKeyListener]);
+
   return (
-    <Paper fixed fullWidth>
+    <Paper fixed>
       <Box style={styles.title}>
         Categoría Esperada
       </Box>
@@ -104,9 +125,7 @@ export default function Test() {
         <Button
           variant='contained'
           endIcon={<ContinuarIcon/>}
-          onClick={() => {
-            fetch(`${BACK_URL}/resume`);
-          }}  
+          onClick={continuarFx}  
         >
           Continuar
         </Button>
@@ -134,7 +153,7 @@ export default function Test() {
               movimientos.map((row) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                      {
+                    {
                       columns.map((column) => {
                         const value = (column.id == 'categoria')? row.datos_tarjeta.categoria :row[column.id];
                         let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
@@ -146,7 +165,7 @@ export default function Test() {
                           </TableCell>
                         );
                       })
-                      }
+                    }
                     </TableRow>
                   );
                 })
