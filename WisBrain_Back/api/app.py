@@ -1,8 +1,10 @@
 import sqlite3
+import threading
 
 from flask import Flask, jsonify, request, g
 from flask_cors import CORS, cross_origin
 from threading import Thread
+import simpleaudio as sa
 
 from WisBrain_Back.service.Arduino import Arduino
 from WisBrain_Back.service.Validador import Validador
@@ -30,8 +32,16 @@ validadorEntrada = ValidadorEntradaDB()
 validador = Validador(tarjetas)
 teclado_listener = TecladoListener(validador)
 resultado = []
+audioSiguiente = sa.WaveObject.from_wave_file("WisBrain_Back/assets/siguiente.wav")
+
+
+def reproducir_audio():
+    play_obj = audioSiguiente.play()
+    play_obj.wait_done()
+
 
 app.config['DATABASE'] = 'WisBrain_Back/bd/database_wb.db'
+
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -84,6 +94,9 @@ def get_update():
 def resume():
     #global arduino
     global teclado_listener
+    thread = threading.Thread(target=reproducir_audio)
+    # Iniciar el hilo
+    thread.start()
     teclado_listener.lock = True
     return jsonify({"mensaje": "se renaudo la deteccion"})
 
@@ -96,17 +109,16 @@ def insertar_paciente():
 
         data = request.get_json()
         dni_paciente = data.get('dni_paciente')
-        primer_nombre = data.get('primer_nombre')
-        segundo_nombre = data.get('segundo_nombre')
+        nombres = data.get('nombres')
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
         fecha_nacimiento = data.get('fecha_nacimiento')
         genero = data.get('genero')
 
         cursor.execute("""
-            INSERT INTO paciente (dni_paciente, primer_nombre, segundo_nombre, ape_paterno, ape_materno, fecha_nacimiento, genero)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
-        """, (dni_paciente, primer_nombre, segundo_nombre, ape_paterno, ape_materno, fecha_nacimiento, genero))
+            INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, genero)
+            VALUES (?, ?, ?, ?, ?, ?);
+        """, (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, genero))
 
         db.commit()
         cursor.close()
@@ -189,14 +201,31 @@ def insertarMovimientos():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/devolverHistorialTestPacientes/<dni_paciente>', methods=['GET'])
+@app.route('/devolverHistorialPaciente/<dni_paciente>', methods=['GET'])
 @cross_origin()
-def devolverHistorialTestPacientes(dni_paciente):
+def devolverHistorialPaciente(dni_paciente):
     try:
         db = get_db()
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
+        historial_tests = cursor.fetchall()
+
+        cursor.close()
+
+        return jsonify(historial_tests), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/devolverHistorialTestPacientes', methods=['GET'])
+@cross_origin()
+def devolverHistorialTestPacientes():
+    try:
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM historial_test;")
         historial_tests = cursor.fetchall()
 
         cursor.close()
@@ -249,6 +278,7 @@ def devolverDatosPaciente(dni_paciente):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/actualizarPaciente', methods=['PUT'])
 @cross_origin()
 def actualizarPaciente():
@@ -274,7 +304,8 @@ def actualizarPaciente():
             UPDATE paciente
             SET dni_paciente = ?, primer_nombre = ?, segundo_nombre = ?, ape_paterno = ?, ape_materno = ?, fecha_nacimiento = ?, genero = ?
             WHERE dni_paciente = ?;
-        """, (dni_paciente_nuevo, primer_nombre, segundo_nombre, ape_paterno, ape_materno, fecha_nacimiento, genero, dni_paciente_antiguo))
+        """, (dni_paciente_nuevo, primer_nombre, segundo_nombre, ape_paterno, ape_materno, fecha_nacimiento, genero,
+              dni_paciente_antiguo))
 
         # Si el DNI es diferente, actualiza las tablas relacionadas
         if dni_paciente_antiguo != dni_paciente_nuevo:

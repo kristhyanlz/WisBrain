@@ -5,6 +5,7 @@ import simpleaudio as sa
 
 class Validador:
     def __init__(self, tarjetas):
+        self.idPaciente = 0
         self.tarjetas = tarjetas
         self.index_movimiento = 0
         self.formaActualOrdenamiento = None
@@ -16,6 +17,7 @@ class Validador:
         self.erroresNoPerseverativos = 0
         self.totalErrores = 0
         self.contadorEP = 0
+        self.numCatCorrectas = 0
         self.resultado = {
             "id": 1,
             "resultado": "PENDIENTE",
