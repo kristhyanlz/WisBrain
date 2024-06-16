@@ -61,35 +61,6 @@ const validate = (values) => {
   return errors;
 }
 
-const handleDniPaciente = (e) => {
-  set_dni_paciente(e.target.value)
-}
-
-const handleNombres = (e) => {
-  set_nombres(e.target.value)
-}
-
-const handleApePaterno = (e) => {
-  set_ape_paterno(e.target.value)
-}
-
-const handleApeMaterno = (e) => {
-  set_ape_materno(e.target.value)
-}
-
-const handleSexo = (e) => {
-  set_sexo(e.target.value)
-}
-
-const handleFechaNacimiento = (newValue) => {
-  setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
-  set_fecha_nacimiento(newValue)
-}
-
-const handleFechaEvaluacion = (newValue) => {
-  set_fecha_evaluacion(newValue)
-}
-
 const sexoOptions = [
   { key: 'Hombre', value: 'Hombre' },
   { key: 'Mujer', value: 'Mujer' },
@@ -101,7 +72,7 @@ export default function FichaSociodemo () {
   const [ape_paterno, set_ape_paterno] = useState("")
   const [ape_materno, set_ape_materno] = useState("")
   const [sexo, set_sexo] = useState("")
-  const [fecha_nacimiento, set_fecha_nacimiento] = useState("")
+  const [fecha_nacimiento, set_fecha_nacimiento] = useState(null)
   const [fecha_evaluacion, set_fecha_evaluacion] = useState(dayjs())
   const navigate = useNavigate();
 
@@ -109,6 +80,38 @@ export default function FichaSociodemo () {
   useEffect(() => {
     setEdadCalculada(null)
   }, [])
+
+  const handleDniPaciente = (e) => {
+    //set_dni_paciente(e.target.value)
+  }
+  
+  const handleNombres = (e) => {
+    //set_nombres(e.target.value)
+  }
+  
+  const handleApePaterno = (e) => {
+    //set_ape_paterno(e.target.value)
+  }
+  
+  const handleApeMaterno = (e) => {
+    //set_ape_materno(e.target.value)
+  }
+  
+  const handleSexo = (e) => {
+    //set_sexo(e.target.value)
+  }
+  
+  const handleFechaNacimiento = (newValue) => {
+    console.log(`Fecha nacimiento newValue ${newValue}`)
+    setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
+    set_fecha_nacimiento(newValue)
+  }
+  
+  const handleFechaEvaluacion = (newValue) => {
+    set_fecha_evaluacion(newValue)
+  }
+
+ 
 
   return (
 
@@ -183,8 +186,8 @@ export default function FichaSociodemo () {
               <Select
                 labelId="lbl-sexo"
                 id="sexo"
-                value={sexo}
                 label="Sexo"
+                value={sexo}
                 onChange={handleSexo}
               >
                 {
@@ -196,11 +199,12 @@ export default function FichaSociodemo () {
             </FormControl>
           </Box>
 
-          <FormControl fullWidth style={styles.formEle}>
+          <FormControl fullWidth style={{...styles.formEle, paddingBottom:20}}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
-              <DatePicker label="Fecha de Nacimiento"
+              <DatePicker
+                label="Fecha de Nacimiento"
                 value={fecha_nacimiento}
                 onChange={handleFechaNacimiento}
               />
