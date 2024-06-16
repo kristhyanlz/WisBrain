@@ -11,6 +11,11 @@ class Validador:
         self.limiteMovimientosCorrectos = 0
         self.iteracionDeFormaDeOrdenamiento = 0
         self.historialFormasOrdenamiento = []
+        self.formaOrdeIncorrecto = None
+        self.erroresPerseverativos = 0
+        self.erroresNoPerseverativos = 0
+        self.totalErrores = 0
+        self.contadorEP = 0
         self.resultado = {
             "id": 1,
             "resultado": "PENDIENTE",
@@ -72,9 +77,17 @@ class Validador:
         else:
             self.resultado['datos_tarjeta']['categoria'] = formaPropuesta
 
+        if formaPropuesta == self.formaOrdeIncorrecto and self.contadorEP >= 1:
+            self.erroresPerseverativos += 1
+        else:
+            self.erroresNoPerseverativos += 1
+            self.contadorEP = 0
+
+
         print("Forma propuesta:", formaPropuesta)
         if formaPropuesta is None:
             print("INCORRECTO")
+            self.formaOrdeIncorrecto = formaPropuesta
             return "INCORRECTO"
 
         if self.formaActualOrdenamiento == formaPropuesta:
@@ -82,9 +95,11 @@ class Validador:
             if self.limiteMovimientosCorrectos == 6:
                 self.limiteMovimientosCorrectos = 0
             self.limiteMovimientosCorrectos += 1
+            self.contadorEP = 0
             return "CORRECTO"
         else:
             print("INCORRECTO")
+            self.formaOrdeIncorrecto = formaPropuesta
             self.limiteMovimientosCorrectos = 0
             return "INCORRECTO"
 
@@ -128,9 +143,12 @@ class Validador:
             play_obj = self.audioCorrecto.play()
         else:
             play_obj = self.audioIncorrecto.play()
+            self.contadorEP += 1
+            self.totalErrores += 1
 
         play_obj.wait_done()
 
         if self.limiteMovimientosCorrectos == 6:
             play_obj = self.audioCambio.play()
             play_obj.wait_done()
+        print("Errores Perseverativos:", self.erroresPerseverativos)
