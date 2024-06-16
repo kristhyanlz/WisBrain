@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Formik } from 'formik';
+import { useFormik, useField } from 'formik';
 //import StyledGroupForm from '../components/StyledGroupForm';
-import { useNavigate } from 'react-router-dom';
+import { useFetcher, useNavigate } from 'react-router-dom';
 
 import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container, Grid } from '@mui/material';
 
@@ -67,51 +67,45 @@ const sexoOptions = [
 ];
 
 export default function FichaSociodemo () {
-  const [dni_paciente, set_dni_paciente] = useState("")
-  const [nombres, set_nombres] = useState("")
-  const [ape_paterno, set_ape_paterno] = useState("")
-  const [ape_materno, set_ape_materno] = useState("")
-  const [sexo, set_sexo] = useState("")
-  const [fecha_nacimiento, set_fecha_nacimiento] = useState(null)
-  const [fecha_evaluacion, set_fecha_evaluacion] = useState(dayjs())
+
+  //const sexoField = useField("sexo")
+  const formik = useFormik({
+    initialValues:{
+      dni_paciente: '',
+      nombres: '',
+      ape_paterno: '',
+      ape_materno: '',
+      sexo: '',
+      fecha_nacimiento: null,
+      fecha_evaluacion: null,
+    },
+    onSubmit: async (values)=>{
+      console.log(`SUBMIT: \n${JSON.stringify(values)}`)
+      const submitForm = await fetch(`${BACK_URL}/insertar_paciente`, {
+          method: 'POST',
+          headers: {
+            Accept: "application/json",
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(null)
+        })
+      }
+  })
+
   const navigate = useNavigate();
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
     setEdadCalculada(null)
   }, [])
-
-  const handleDniPaciente = (e) => {
-    //set_dni_paciente(e.target.value)
-  }
   
-  const handleNombres = (e) => {
-    //set_nombres(e.target.value)
-  }
-  
-  const handleApePaterno = (e) => {
-    //set_ape_paterno(e.target.value)
-  }
-  
-  const handleApeMaterno = (e) => {
-    //set_ape_materno(e.target.value)
-  }
-  
-  const handleSexo = (e) => {
-    //set_sexo(e.target.value)
-  }
-  
+  /*
   const handleFechaNacimiento = (newValue) => {
     console.log(`Fecha nacimiento newValue ${newValue}`)
     setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
     set_fecha_nacimiento(newValue)
   }
-  
-  const handleFechaEvaluacion = (newValue) => {
-    set_fecha_evaluacion(newValue)
-  }
-
- 
+    */
 
   return (
 
@@ -124,60 +118,52 @@ export default function FichaSociodemo () {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'}}>
-        {/*
-        <InputLabel htmlFor="nombres">Nombres</InputLabel>
-        <Input id="my-input" aria-describedby="helper-nombres" />
-  <FormHelperText id="helper-nombres">Nombres del paciente</FormHelperText>*/}
-        <Box component='form' sx={{ mt: 1}}>
+        <Box component='form' onSubmit={formik.handleSubmit} sx={{ mt: 1}}>
 
           <TextField 
             margin='normal'
             required
             fullWidth
-            id="dni" 
             label="DNI"
-            name="dni"
+            name="dni_paciente"
             autoFocus
             style={styles.formEle}
             variant="filled"
-            value={dni_paciente}
-            onChange={handleDniPaciente}
+            //value={dni_paciente}
+            onChange={formik.handleChange}
           />
           <TextField
             margin='normal'
             required
-            fullWidth 
-            id="nombres"
+            fullWidth
             label="Nombres"
             name="nombres"
             style={styles.formEle}
             variant="filled"
-            value={nombres}
-            onChange={handleNombres}
+            //value={nombres}
+            onChange={formik.handleChange}
           />
           <TextField 
             margin='normal'
             required
             fullWidth
-            id="apellidoPaterno"
             label="Apellido Paterno"
-            name='apellidoPaterno'
+            name='ape_paterno'
             style={styles.formEle}
             variant="filled"
-            value={ape_paterno}
-            onChange={handleApePaterno}
+            //value={ape_paterno}
+            onChange={formik.handleChange}
           />
           <TextField 
             margin='normal'
             required
             fullWidth
-            id="apellidoMaterno"
             label="Apellido Materno"
-            name='apellidoMaterno'
+            name='ape_materno'
             style={styles.formEle}
             variant="filled"
-            value={ape_materno}
-            onChange={handleApeMaterno}
+            //value={ape_materno}
+            onChange={formik.handleChange}
           />
 
           <Box fullWidth style={styles.formEle}>
@@ -185,10 +171,8 @@ export default function FichaSociodemo () {
               <InputLabel id="lbl-sexo">Sexo</InputLabel>        
               <Select
                 labelId="lbl-sexo"
-                id="sexo"
                 label="Sexo"
-                value={sexo}
-                onChange={handleSexo}
+                onChange={formik.handleChange("sexo")}
               >
                 {
                   sexoOptions.map((ele) => 
@@ -205,8 +189,11 @@ export default function FichaSociodemo () {
               
               <DatePicker
                 label="Fecha de Nacimiento"
-                value={fecha_nacimiento}
-                onChange={handleFechaNacimiento}
+                //value={fecha_nacimiento}
+                onChange={(newValue) =>{
+                  console.log(`FECHA NACIMIENTO: ${newValue}`)
+                  formik.setFieldValue("fecha_nacimiento", newValue)
+                }}
               />
             </LocalizationProvider>
             <FormHelperText>Edad: {edadCalculada}</FormHelperText>
@@ -218,8 +205,8 @@ export default function FichaSociodemo () {
               
               <DatePicker 
                 label="Fecha de evaluacion" 
-                value={fecha_evaluacion}
-                onChange={handleFechaEvaluacion}
+                value={dayjs(new Date, "MM-DD-YYYY")}
+                
                 disabled 
               />
             </LocalizationProvider>
@@ -227,19 +214,9 @@ export default function FichaSociodemo () {
 
           <Box sx={{display: 'flex', justifyContent: 'center'}}>
             <Button
-              type='submit'
+              type="submit"
               variant='outlined'
               sx={{ mt: 3, mb: 2}}
-              onClick={async()=> {
-                const rpta = await fetch(`${BACK_URL}/insertar_paciente`, {
-                  method: 'POST',
-                  headers: {
-                    Accept: "application/json",
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(reg)
-                })
-              }}
             >
               ¡Ir al test!
             </Button>
