@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import { red } from '@mui/material/colors';
 
@@ -8,7 +8,7 @@ import { red } from '@mui/material/colors';
 import correctoAudio from  '../assets/correcto.mp3'
 import incorrectoAudio from '../assets/incorrecto.mp3'
 
-import CropSquareIcon from '@mui/icons-material/CropSquare';
+import ContinuarIcon from '@mui/icons-material/PlayArrow';
 
 const BACK_URL = "http://localhost:5000"
 
@@ -38,6 +38,7 @@ export default function Test() {
   //const [correctoPlayer] = useState(new Audio( correctoAudio ))
   //const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
 
+  const tableRef = useRef(null);
 
   const [movimientos, setMovimientos] = useState([
     {
@@ -55,6 +56,7 @@ export default function Test() {
   
   const [flag, setFlag] = useState(false)
   useEffect(()=> {
+    
     const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
@@ -64,10 +66,12 @@ export default function Test() {
             setMovimientos(movs)
             if (flagPlayer < movs.length){
               setFlagPlayer(movs.length)
+              tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
             }
           }
         })
     }, 1000)
+    
   }, [flag])
 
   const [flagPlayer, setFlagPlayer] = useState(0)
@@ -82,8 +86,28 @@ export default function Test() {
       */
   }, [flagPlayer])
 
+  const continuarFx = () => {
+    console.log("CONTINUAR")
+    fetch(`${BACK_URL}/resume`);
+  }
+
+  const spaceKeyListener = React.useCallback((event) => {
+    if (event.key == " "){
+      console.log(`Tecla espacio`)
+      continuarFx();
+    }
+  }, [])
+
+  useEffect(() => {
+    document.addEventListener("keydown", spaceKeyListener, false);
+
+    return () => {
+      document.removeEventListener("keydown", spaceKeyListener, false);
+    };
+  }, [spaceKeyListener]);
+
   return (
-    <Paper fixed fullWidth>
+    <Paper fixed>
       <Box style={styles.title}>
         Categoría Esperada
       </Box>
@@ -101,17 +125,15 @@ export default function Test() {
       <Box style={{textAlign: 'center', paddingBottom: 20}}>
         <Button
           variant='contained'
-          endIcon={<CropSquareIcon/>}
-          onClick={() => {
-            fetch(`${BACK_URL}/resume`);
-          }}  
+          endIcon={<ContinuarIcon/>}
+          onClick={continuarFx}  
         >
           Siguiente
         </Button>
       </Box>
 
       <Paper sx={{ width: '100%' }}>
-        <TableContainer sx={{ maxHeight: 440 }}>
+        <TableContainer sx={{ maxHeight: 440 }} ref={tableRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -132,7 +154,7 @@ export default function Test() {
               movimientos.map((row) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                      {
+                    {
                       columns.map((column) => {
                         const value = (column.id == 'categoria')? row.datos_tarjeta.categoria :row[column.id];
                         let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
@@ -144,7 +166,7 @@ export default function Test() {
                           </TableCell>
                         );
                       })
-                      }
+                    }
                     </TableRow>
                   );
                 })
