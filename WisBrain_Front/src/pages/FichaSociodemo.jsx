@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Formik } from 'formik';
 //import StyledGroupForm from '../components/StyledGroupForm';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container, Grid } from '@mui/material';
 
 //DATE
+import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -73,6 +74,11 @@ export default function FichaSociodemo () {
   const handleChange = (event) => {
     setAge(event.target.value);
   };
+
+  const [edadCalculada, setEdadCalculada] = useState(null)
+  useEffect(() => {
+    setEdadCalculada(null)
+  }, [])
 
   return (
 
@@ -146,15 +152,20 @@ export default function FichaSociodemo () {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
-              <DatePicker label="Fecha de Nacimiento"/>
+              <DatePicker label="Fecha de Nacimiento"
+                onChange={(newValue) => {
+                  setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
+                }}
+              />
             </LocalizationProvider>
+            <FormHelperText>Edad: {edadCalculada}</FormHelperText>
           </FormControl>
 
           <FormControl fullWidth style={styles.formEle}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
-              <DatePicker label="Fecha de evaluacion"/>
+              <DatePicker disabled label="Fecha de evaluacion" value={dayjs()}/>
             </LocalizationProvider>
           </FormControl>
 
