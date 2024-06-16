@@ -111,7 +111,7 @@ class DataHelper:
         cursor = self.conexion.cursor()
         try:
             for movimiento in movimientos:
-                numero_tarjeta = movimiento.get('numero_tarjeta')
+                numero_tarjeta = movimiento.get('id')
                 resultado = movimiento.get('resultado')
                 categoria_esperada_id = movimiento.get('categoria_esperada_id')
                 categoria_propuesta_id = movimiento.get('categoria_propuesta_id')

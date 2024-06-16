@@ -18,6 +18,7 @@ class Validador:
         self.totalErrores = 0
         self.contadorEP = 0
         self.numCatCorrectas = 0
+        self.fechaEvaluacion = None
         self.resultado = {
             "id": 1,
             "resultado": "PENDIENTE",
@@ -151,6 +152,7 @@ class Validador:
         play_obj.wait_done()
 
         if self.limiteMovimientosCorrectos == 6:
+            self.numCatCorrectas += 1
             play_obj = self.audioCambio.play()
             play_obj.wait_done()
         print("Errores Perseverativos:", self.erroresPerseverativos)

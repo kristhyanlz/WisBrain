@@ -81,7 +81,8 @@ def hello_world():
 @cross_origin()
 def get_update():
     #global arduino, resultado
-    global resultado, teclado_listener
+    global resultado, teclado_listener, validador
+
     #resultado = arduino.resultados_validacion
     resultado = teclado_listener.resultados_validacion
     # Devuelve la lista completa de resultados
@@ -93,7 +94,10 @@ def get_update():
 @cross_origin()
 def resume():
     #global arduino
-    global teclado_listener
+    global teclado_listener, resultado
+    if len(resultado) == 48:
+
+        return jsonify({"mensaje: se termino el TEST"})
     thread = threading.Thread(target=reproducir_audio)
     # Iniciar el hilo
     thread.start()
@@ -108,17 +112,18 @@ def insertar_paciente():
         cursor = db.cursor()
 
         data = request.get_json()
+        validador.fechaEvaluacion = data.get('fecha_evaluacion')
         dni_paciente = data.get('dni_paciente')
         nombres = data.get('nombres')
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
         fecha_nacimiento = data.get('fecha_nacimiento')
-        genero = data.get('genero')
+        genero = data.get('sexo')
 
         cursor.execute("""
-            INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, genero)
+            INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, sexo)
             VALUES (?, ?, ?, ?, ?, ?);
-        """, (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, genero))
+        """, (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, sexo))
 
         db.commit()
         cursor.close()
@@ -139,71 +144,19 @@ def obtenerFechaActual():
 @cross_origin()
 def insertarHistorial():
     try:
-        db = get_db()
-        cursor = db.cursor()
 
         data = request.get_json()
-        dni_paciente = data.get('dni_paciente')
-        num_cat_correctas = data.get('num_cat_correctas')
-        num_err_perseverativos = data.get('num_err_perseverativos')
-        num_err_no_perseverativos = data.get('num_err_no_perseverativos')
-        num_total_errores = data.get('num_total_errores')
-        procentaje_errores_perseverativos = data.get('procentaje_errores_perseverativos')
         observaciones = data.get('observaciones')
-        fecha_test = data.get('fecha_test')
-        resultado_test = data.get('resultado_test')
-
-        cursor.execute("""
-            INSERT INTO historial_test (id_historial, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
-                                       num_total_errores, procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, num_total_errores,
-              procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test))
-
-        db.commit()
-        cursor.close()
+        insertarTEST(observaciones)
+        insertarMOVS()
 
         return jsonify({'message': 'Historial insertado correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@app.route('/insertarMovimientos', methods=['POST'])
+@app.route('/devolverResultadosHistorialPaciente/<dni_paciente>', methods=['GET'])
 @cross_origin()
-def insertarMovimientos():
-    try:
-        db = get_db()
-        cursor = db.cursor()
-
-        data = request.get_json()
-        movimientos = data.get('movimientos', [])
-
-        if not movimientos:
-            return jsonify({'error': 'Lista de movimientos vacía'}), 400
-
-        for movimiento in movimientos:
-            numero_tarjeta = movimiento.get('numero_tarjeta')
-            resultado = movimiento.get('resultado')
-            categoria_esperada_id = movimiento.get('categoria_esperada_id')
-            categoria_propuesta_id = movimiento.get('categoria_propuesta_id')
-            id_historial = movimiento.get('id_historial')
-
-            cursor.execute("""
-                INSERT INTO movimiento (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial)
-                VALUES (?, ?, ?, ?, ?);
-            """, (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial))
-
-        db.commit()
-        cursor.close()
-
-        return jsonify({'message': 'Movimientos insertados correctamente'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/devolverHistorialPaciente/<dni_paciente>', methods=['GET'])
-@cross_origin()
-def devolverHistorialPaciente(dni_paciente):
+def devolverResultadosHistorialPaciente(dni_paciente):
     try:
         db = get_db()
         cursor = db.cursor()
@@ -225,12 +178,30 @@ def devolverHistorialTestPacientes():
         db = get_db()
         cursor = db.cursor()
 
+        # Obtener todos los historiales
         cursor.execute("SELECT * FROM historial_test;")
         historial_tests = cursor.fetchall()
 
+        # Estructura para almacenar los historiales y sus movimientos
+        response_data = []
+
+        for historial in historial_tests:
+            historial_id = historial['id_historial']
+
+            # Obtener los movimientos para cada historial
+            cursor.execute("SELECT * FROM movimientos WHERE id_historial = ?;", (historial_id,))
+            movimientos = cursor.fetchall()
+
+            # Combinar el historial con sus movimientos
+            historial_data = {
+                'historial': historial,
+                'movimientos': movimientos
+            }
+            response_data.append(historial_data)
+
         cursor.close()
 
-        return jsonify(historial_tests), 200
+        return jsonify(response_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -286,8 +257,7 @@ def actualizarPaciente():
         data = request.get_json()
         dni_paciente_antiguo = data.get('dni_paciente_antiguo')
         dni_paciente_nuevo = data.get('dni_paciente_nuevo')
-        primer_nombre = data.get('primer_nombre')
-        segundo_nombre = data.get('segundo_nombre')
+        nombres = data.get('nombres')
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
         fecha_nacimiento = data.get('fecha_nacimiento')
@@ -302,9 +272,9 @@ def actualizarPaciente():
         # Actualiza el paciente en la tabla paciente
         cursor.execute("""
             UPDATE paciente
-            SET dni_paciente = ?, primer_nombre = ?, segundo_nombre = ?, ape_paterno = ?, ape_materno = ?, fecha_nacimiento = ?, genero = ?
+            SET dni_paciente = ?, nombres = ?, ape_paterno = ?, ape_materno = ?, fecha_nacimiento = ?, genero = ?
             WHERE dni_paciente = ?;
-        """, (dni_paciente_nuevo, primer_nombre, segundo_nombre, ape_paterno, ape_materno, fecha_nacimiento, genero,
+        """, (dni_paciente_nuevo, nombres, ape_paterno, ape_materno, fecha_nacimiento, genero,
               dni_paciente_antiguo))
 
         # Si el DNI es diferente, actualiza las tablas relacionadas
@@ -336,6 +306,56 @@ def actualizarPaciente():
     finally:
         cursor.close()
 
+def insertarTEST(observaciones):
+    global validador, resultado
+    db = get_db()
+    cursor = db.cursor()
+
+    dni_paciente = validador.idPaciente
+    num_cat_correctas = validador.numCatCorrectas
+    num_err_perseverativos = validador.erroresPerseverativos
+    num_err_no_perseverativos = validador.erroresNoPerseverativos
+    num_total_errores = validador.totalErrores
+    procentaje_errores_perseverativos = (validador.erroresPerseverativos / 48) * 100
+    observaciones = observaciones
+    fecha_test = validador.fechaEvaluacion
+    resultado_test = "BUENO"
+
+    cursor.execute("""
+                INSERT INTO historial_test (id_historial, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
+                                           num_total_errores, procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, num_total_errores,
+                  procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test))
+
+    db.commit()
+    cursor.close()
+
+def insertarMOVS():
+    global validador, resultado
+
+    db = get_db()
+    cursor = db.cursor()
+
+    movimientos = resultado
+
+    if not movimientos:
+        return jsonify({'error': 'Lista de movimientos vacía'}), 400
+
+    for movimiento in movimientos:
+        numero_tarjeta = movimiento['numero_tarjeta']
+        resultado2 = movimiento['resultado']
+        categoria_esperada_id = movimiento['categoria']
+        categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
+        id_historial = validador.idPaciente
+
+        cursor.execute("""
+                    INSERT INTO movimiento (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial)
+                    VALUES (?, ?, ?, ?, ?);
+                """, (numero_tarjeta, resultado2, categoria_esperada_id, categoria_propuesta_id, id_historial))
+
+    db.commit()
+    cursor.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
