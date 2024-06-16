@@ -1,4 +1,8 @@
+import threading
+
 import simpleaudio as sa
+
+
 class Validador:
     def __init__(self, tarjetas):
         self.tarjetas = tarjetas
@@ -30,8 +34,8 @@ class Validador:
             print("1")
             veredicto = self.correctoOincorrecto(posicionTarjeta)
             # if self.limiteMovimientosCorrectos == 6:
-                # play_obj = self.audioCambio.play()
-                #   |play_obj.wait_done()
+            # play_obj = self.audioCambio.play()
+            #   |play_obj.wait_done()
         else:
             print("2")
             self.actualizarFormaOrdenamiento(posicionTarjeta)
@@ -40,7 +44,12 @@ class Validador:
             # play_obj.wait_done()
             veredicto = self.correctoOincorrecto(posicionTarjeta)
 
-        if veredicto is 'CORRECTO':
+        # Crear el hilo y pasarlo a la función con los argumentos necesarios
+        thread = threading.Thread(target=self.reproducir_audio, args=(veredicto,))
+
+        # Iniciar el hilo
+        thread.start()
+        '''if veredicto is 'CORRECTO':
             play_obj = self.audioCorrecto.play()
         else:
             play_obj = self.audioIncorrecto.play()
@@ -50,7 +59,7 @@ class Validador:
         if self.limiteMovimientosCorrectos == 6:
             play_obj = self.audioCambio.play()
             play_obj.wait_done()
-
+'''
         self.resultado['resultado'] = veredicto
         self.resultado['categoria'] = self.formaActualOrdenamiento
         self.index_movimiento += 1
@@ -113,3 +122,15 @@ class Validador:
             elif self.iteracionDeFormaDeOrdenamiento == 5:
                 self.formaActualOrdenamiento = self.historialFormasOrdenamiento[2]
         self.iteracionDeFormaDeOrdenamiento += 1
+
+    def reproducir_audio(self, veredicto):
+        if veredicto == 'CORRECTO':
+            play_obj = self.audioCorrecto.play()
+        else:
+            play_obj = self.audioIncorrecto.play()
+
+        play_obj.wait_done()
+
+        if self.limiteMovimientosCorrectos == 6:
+            play_obj = self.audioCambio.play()
+            play_obj.wait_done()

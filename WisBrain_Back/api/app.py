@@ -12,7 +12,7 @@ from WisBrain_Back.service.Util import obtenerFechaActual
 
 from WisBrain_Back.service.TecladoListener import TecladoListener
 
-#import logging
+import logging
 
 #python -m flask run
 
@@ -20,8 +20,8 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-#log = logging.getLogger('werkzeug')
-#log.setLevel(logging.ERROR)
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 # Inicializar la clase Arduino, Tarjetas y Validador
 # arduino = Arduino('COM5')
