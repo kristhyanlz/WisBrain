@@ -126,7 +126,8 @@ export default function Test() {
         <Button
           variant='contained'
           endIcon={<ContinuarIcon/>}
-          onClick={continuarFx}  
+          onClick={continuarFx} 
+          sx={{paddingTop:2, paddingBottom: 2, paddingRight: 4, paddingLeft: 4}} 
         >
           Siguiente
         </Button>
