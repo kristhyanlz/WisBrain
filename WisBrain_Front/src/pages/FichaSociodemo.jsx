@@ -61,24 +61,49 @@ const validate = (values) => {
   return errors;
 }
 
-const initialValues = {
-  nombres: '',
-  edad: '',
-  sexo: '',
+const handleDniPaciente = (e) => {
+  set_dni_paciente(e.target.value)
+}
+
+const handleNombres = (e) => {
+  set_nombres(e.target.value)
+}
+
+const handleApePaterno = (e) => {
+  set_ape_paterno(e.target.value)
+}
+
+const handleApeMaterno = (e) => {
+  set_ape_materno(e.target.value)
+}
+
+const handleSexo = (e) => {
+  set_sexo(e.target.value)
+}
+
+const handleFechaNacimiento = (newValue) => {
+  setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
+  set_fecha_nacimiento(newValue)
+}
+
+const handleFechaEvaluacion = (newValue) => {
+  set_fecha_evaluacion(newValue)
 }
 
 const sexoOptions = [
-  { key: 'H', value: 'Hombre' },
-  { key: 'M', value: 'Mujer' },
+  { key: 'Hombre', value: 'Hombre' },
+  { key: 'Mujer', value: 'Mujer' },
 ];
 
 export default function FichaSociodemo () {
-  const [age, setAge] = React.useState('');
+  const [dni_paciente, set_dni_paciente] = useState("")
+  const [nombres, set_nombres] = useState("")
+  const [ape_paterno, set_ape_paterno] = useState("")
+  const [ape_materno, set_ape_materno] = useState("")
+  const [sexo, set_sexo] = useState("")
+  const [fecha_nacimiento, set_fecha_nacimiento] = useState("")
+  const [fecha_evaluacion, set_fecha_evaluacion] = useState(dayjs())
   const navigate = useNavigate();
-
-  const handleChange = (event) => {
-    setAge(event.target.value);
-  };
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
@@ -112,6 +137,8 @@ export default function FichaSociodemo () {
             autoFocus
             style={styles.formEle}
             variant="filled"
+            value={dni_paciente}
+            onChange={handleDniPaciente}
           />
           <TextField
             margin='normal'
@@ -122,16 +149,32 @@ export default function FichaSociodemo () {
             name="nombres"
             style={styles.formEle}
             variant="filled"
+            value={nombres}
+            onChange={handleNombres}
           />
           <TextField 
             margin='normal'
             required
             fullWidth
-            id="apellidos"
-            label="Apellidos"
-            name='apellidos'
+            id="apellidoPaterno"
+            label="Apellido Paterno"
+            name='apellidoPaterno'
             style={styles.formEle}
             variant="filled"
+            value={ape_paterno}
+            onChange={handleApePaterno}
+          />
+          <TextField 
+            margin='normal'
+            required
+            fullWidth
+            id="apellidoMaterno"
+            label="Apellido Materno"
+            name='apellidoMaterno'
+            style={styles.formEle}
+            variant="filled"
+            value={ape_materno}
+            onChange={handleApeMaterno}
           />
 
           <Box fullWidth style={styles.formEle}>
@@ -140,9 +183,9 @@ export default function FichaSociodemo () {
               <Select
                 labelId="lbl-sexo"
                 id="sexo"
-                value={age}
+                value={sexo}
                 label="Sexo"
-                onChange={handleChange}
+                onChange={handleSexo}
               >
                 {
                   sexoOptions.map((ele) => 
@@ -158,9 +201,8 @@ export default function FichaSociodemo () {
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
               <DatePicker label="Fecha de Nacimiento"
-                onChange={(newValue) => {
-                  setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
-                }}
+                value={fecha_nacimiento}
+                onChange={handleFechaNacimiento}
               />
             </LocalizationProvider>
             <FormHelperText>Edad: {edadCalculada}</FormHelperText>
@@ -170,7 +212,12 @@ export default function FichaSociodemo () {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
-              <DatePicker disabled label="Fecha de evaluacion" value={dayjs()}/>
+              <DatePicker 
+                label="Fecha de evaluacion" 
+                value={fecha_evaluacion}
+                onChange={handleFechaEvaluacion}
+                disabled 
+              />
             </LocalizationProvider>
           </FormControl>
 
