@@ -12,8 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 //TOAST
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 //BACK URL
 import BACK_URL from './backURL';
@@ -56,8 +55,8 @@ const sexoOptions = [
 ];
 
 export default function FichaSociodemo () {
+  const navigate = useNavigate();
 
-  //const sexoField = useField("sexo")
   const formik = useFormik({
     initialValues:{
       dni_paciente: '',
@@ -70,6 +69,7 @@ export default function FichaSociodemo () {
     },
     onSubmit: async (values)=>{
       console.log(`SUBMIT: \n${JSON.stringify(values)}`)
+      toast.info('Enviando información...')
       try {
         const submitForm = await fetch(`${BACK_URL}/insertar_paciente`, {
           method: 'POST',
@@ -87,9 +87,6 @@ export default function FichaSociodemo () {
             fecha_evaluacion: values.fecha_evaluacion
           })
         })
-        //const result =await submitForm.json();//Puede generar el error
-        //console.log(result)
-        //toast.success('Información guardada correctamente')
 
         if (!submitForm.ok) {
           if (submitForm.status === 500) {
@@ -102,6 +99,7 @@ export default function FichaSociodemo () {
           const result = await submitForm.json();
           console.log(result);
           toast.success('Información guardada correctamente');
+          navigate('/Test')
         }
 
       } catch (error) {
@@ -110,8 +108,6 @@ export default function FichaSociodemo () {
     },
     validationSchema: FormSchema
   })
-
-  const navigate = useNavigate();
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
@@ -252,7 +248,6 @@ export default function FichaSociodemo () {
           
         </Box>
       </Box>
-      <ToastContainer />
     </Container>
   );
 }
