@@ -45,32 +45,10 @@ const FormSchema = Yup.object().shape({
   nombres: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
   ape_paterno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
   ape_materno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
-  sexo: Yup.string(),
+  sexo: Yup.string().required('Por favor, seleccione una opción'),
   fecha_nacimiento: Yup.date().required('Campo requerido'),
   fecha_evaluacion: Yup.date().required('Campo requerido'),
 })
-
-const validate = (values) => {
-  const errors = {};
-
-  if (!values.nombres) {
-    errors.nombres = 'Campo requerido';
-  }
-
-  if (!values.edad) {
-    errors.edad = 'Campo requerido';
-  }
-  const edad = parseInt(values.edad);
-  if (edad < EDAD_MINIMA || edad > EDAD_MAXIMA || edad.toString() !== values.edad){
-    errors.edad = 'Edad no permitida';
-  }
-
-  if (!values.sexo) {
-    errors.sexo = 'Campo requerido';
-  }
-
-  return errors;
-}
 
 const sexoOptions = [
   { key: 'Hombre', value: 'Hombre' },
@@ -143,8 +121,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={dni_paciente}
             onChange={formik.handleChange}
-            error={ Boolean(formik.touched.dni_paciente && formik.errors.dni_paciente) }
-            helperText={formik.touched.dni_paciente && formik.errors.dni_paciente}
+            error={formik.errors.dni_paciente}
+            helperText={formik.errors.dni_paciente}
           />
           <TextField
             margin='normal'
@@ -156,8 +134,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={nombres}
             onChange={formik.handleChange}
-            error={ Boolean(formik.touched.nombres && formik.errors.nombres) }
-            helperText={formik.touched.nombres && formik.errors.nombres}
+            error={formik.errors.nombres}
+            helperText={formik.errors.nombres}
           />
           <TextField 
             margin='normal'
@@ -169,8 +147,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={ape_paterno}
             onChange={formik.handleChange}
-            error={ Boolean(formik.touched.ape_paterno && formik.errors.ape_paterno) }
-            helperText={formik.touched.ape_paterno && formik.errors.ape_paterno}
+            error={formik.errors.ape_paterno }
+            helperText={formik.errors.ape_paterno}
           />
           <TextField 
             margin='normal'
@@ -182,8 +160,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={ape_materno}
             onChange={formik.handleChange}
-            error={ Boolean(formik.touched.ape_materno && formik.errors.ape_materno) }
-            helperText={formik.touched.ape_materno && formik.errors.ape_materno}
+            error={formik.errors.ape_materno}
+            helperText={formik.errors.ape_materno}
           />
 
           <Box fullWidth style={styles.formEle}>
@@ -194,8 +172,8 @@ export default function FichaSociodemo () {
                 label="Sexo"
                 required
                 onChange={formik.handleChange("sexo")}
-                error={ Boolean(formik.touched.sexo && formik.errors.sexo) }
-                helperText={formik.touched.sexo && formik.errors.sexo}
+                error={formik.errors.sexo}
+                helperText={formik.errors.sexo}
               >
                 {
                   sexoOptions.map((ele) => 
