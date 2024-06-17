@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Formik } from 'formik';
-//import StyledGroupForm from '../components/StyledGroupForm';
-import { useNavigate } from 'react-router-dom';
+import { useFormik, useField } from 'formik';
+import * as Yup from 'yup';
+import { useFetcher, useNavigate } from 'react-router-dom';
 
 import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container, Grid } from '@mui/material';
 
@@ -11,6 +11,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
+//TOAST
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+//BACK URL
+import BACK_URL from './backURL';
 
 const EDAD_MINIMA = 15
 const EDAD_MAXIMA = 21
@@ -34,51 +40,62 @@ const styles = {
   }
 };
 
-const validate = (values) => {
-  const errors = {};
-
-  if (!values.nombres) {
-    errors.nombres = 'Campo requerido';
-  }
-
-  if (!values.edad) {
-    errors.edad = 'Campo requerido';
-  }
-  const edad = parseInt(values.edad);
-  if (edad < EDAD_MINIMA || edad > EDAD_MAXIMA || edad.toString() !== values.edad){
-    errors.edad = 'Edad no permitida';
-  }
-
-  if (!values.sexo) {
-    errors.sexo = 'Campo requerido';
-  }
-
-  return errors;
-}
-
-const initialValues = {
-  nombres: '',
-  edad: '',
-  sexo: '',
-}
+const FormSchema = Yup.object().shape({
+  dni_paciente: Yup.string().matches(/^\d{8}$/, 'Debe ingresar los 8 dígitos del DNI').required('Campo requerido'),
+  nombres: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  ape_paterno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  ape_materno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  sexo: Yup.string().required('Por favor, seleccione una opción'),
+  fecha_nacimiento: Yup.date().required('Campo requerido'),
+  fecha_evaluacion: Yup.date().required('Campo requerido'),
+})
 
 const sexoOptions = [
-  { key: 'H', value: 'Hombre' },
-  { key: 'M', value: 'Mujer' },
+  { key: 'Hombre', value: 'Hombre' },
+  { key: 'Mujer', value: 'Mujer' },
 ];
 
 export default function FichaSociodemo () {
-  const [age, setAge] = React.useState('');
-  const navigate = useNavigate();
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
-  };
+  //const sexoField = useField("sexo")
+  const formik = useFormik({
+    initialValues:{
+      dni_paciente: '',
+      nombres: '',
+      ape_paterno: '',
+      ape_materno: '',
+      sexo: '',
+      fecha_nacimiento: null,
+      fecha_evaluacion: dayjs(),
+    },
+    onSubmit: async (values)=>{
+      console.log(`SUBMIT: \n${JSON.stringify(values)}`)
+      try {
+        const submitForm = await fetch(`${BACK_URL}/insertar_paciente`, {
+          method: 'POST',
+          headers: {
+            Accept: "application/json",
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(null)
+        })
+        const result =await submitForm.json();//Puede generar el error
+        console.log(result)
+      } catch (error) {
+        toast.error('Error al enviar la información')
+      }
+    },
+    validationSchema: FormSchema
+  })
+
+  const navigate = useNavigate();
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
     setEdadCalculada(null)
   }, [])
+  
+  const [fechaEvaluacion, setFechaEvaluacion] = useState(dayjs())
 
   return (
 
@@ -91,42 +108,60 @@ export default function FichaSociodemo () {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'}}>
-        {/*
-        <InputLabel htmlFor="nombres">Nombres</InputLabel>
-        <Input id="my-input" aria-describedby="helper-nombres" />
-  <FormHelperText id="helper-nombres">Nombres del paciente</FormHelperText>*/}
-        <Box component='form' sx={{ mt: 1}}>
+        <Box component='form' onSubmit={formik.handleSubmit} sx={{ mt: 1}}>
 
           <TextField 
             margin='normal'
             required
             fullWidth
-            id="dni" 
             label="DNI"
-            name="dni"
+            name="dni_paciente"
             autoFocus
             style={styles.formEle}
             variant="filled"
+            //value={dni_paciente}
+            onChange={formik.handleChange}
+            error={formik.errors.dni_paciente}
+            helperText={formik.errors.dni_paciente}
           />
           <TextField
             margin='normal'
             required
-            fullWidth 
-            id="nombres"
+            fullWidth
             label="Nombres"
             name="nombres"
             style={styles.formEle}
             variant="filled"
+            //value={nombres}
+            onChange={formik.handleChange}
+            error={formik.errors.nombres}
+            helperText={formik.errors.nombres}
           />
           <TextField 
             margin='normal'
             required
             fullWidth
-            id="apellidos"
-            label="Apellidos"
-            name='apellidos'
+            label="Apellido Paterno"
+            name='ape_paterno'
             style={styles.formEle}
             variant="filled"
+            //value={ape_paterno}
+            onChange={formik.handleChange}
+            error={formik.errors.ape_paterno }
+            helperText={formik.errors.ape_paterno}
+          />
+          <TextField 
+            margin='normal'
+            required
+            fullWidth
+            label="Apellido Materno"
+            name='ape_materno'
+            style={styles.formEle}
+            variant="filled"
+            //value={ape_materno}
+            onChange={formik.handleChange}
+            error={formik.errors.ape_materno}
+            helperText={formik.errors.ape_materno}
           />
 
           <Box fullWidth style={styles.formEle}>
@@ -134,10 +169,11 @@ export default function FichaSociodemo () {
               <InputLabel id="lbl-sexo">Sexo</InputLabel>        
               <Select
                 labelId="lbl-sexo"
-                id="sexo"
-                value={age}
                 label="Sexo"
-                onChange={handleChange}
+                required
+                onChange={formik.handleChange("sexo")}
+                error={formik.errors.sexo}
+                helperText={formik.errors.sexo}
               >
                 {
                   sexoOptions.map((ele) => 
@@ -148,14 +184,21 @@ export default function FichaSociodemo () {
             </FormControl>
           </Box>
 
-          <FormControl fullWidth style={styles.formEle}>
+          <FormControl fullWidth style={{...styles.formEle, paddingBottom:20}}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
-              <DatePicker label="Fecha de Nacimiento"
-                onChange={(newValue) => {
+              <DatePicker
+                label="Fecha de Nacimiento"
+                format='DD-MM-YYYY'
+                required
+                onChange={(newValue) =>{
+                  console.log(`FECHA NACIMIENTO: ${newValue}`)
+                  formik.setFieldValue("fecha_nacimiento", newValue)
                   setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
                 }}
+                slotProps={{ textField: { required: true }}}
+                disableFuture
               />
             </LocalizationProvider>
             <FormHelperText>Edad: {edadCalculada}</FormHelperText>
@@ -165,34 +208,28 @@ export default function FichaSociodemo () {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
-              <DatePicker disabled label="Fecha de evaluacion" value={dayjs()}/>
+              <DatePicker 
+                label="Fecha de evaluacion"
+                format='DD-MM-YYYY'
+                value={fechaEvaluacion}
+                disabled 
+              />
             </LocalizationProvider>
           </FormControl>
 
-          <Grid container justifyContent='space-around'>
-            <Grid item>
-              <Button
-                type='submit'
-                variant='outlined'
-                sx={{ mt: 3, mb: 2}}
-              >
-                Guardar
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                type='submit'
-                variant='outlined'
-                sx={{ mt: 3, mb: 2}}
-              >
-                ¡Ir al test!
-              </Button>
-            </Grid>
-          </Grid>
+          <Box sx={{display: 'flex', justifyContent: 'center'}}>
+            <Button
+              type="submit"
+              variant='outlined'
+              sx={{ mt: 3, mb: 2}}
+            >
+              ¡Ir al test!
+            </Button>
+          </Box>
           
         </Box>
       </Box>
-
+      <ToastContainer />
     </Container>
   );
 }
