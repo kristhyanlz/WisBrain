@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik, useField } from 'formik';
-//import StyledGroupForm from '../components/StyledGroupForm';
+import * as Yup from 'yup';
 import { useFetcher, useNavigate } from 'react-router-dom';
 
 import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container, Grid } from '@mui/material';
@@ -13,6 +13,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 //TOAST
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 //BACK URL
 import BACK_URL from './backURL';
@@ -38,6 +39,16 @@ const styles = {
     padding: 10
   }
 };
+
+const FormSchema = Yup.object().shape({
+  dni_paciente: Yup.string().matches(/^\d{8}$/, 'Debe ingresar los 8 dígitos del DNI').required('Campo requerido'),
+  nombres: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  ape_paterno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  ape_materno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  sexo: Yup.string(),
+  fecha_nacimiento: Yup.date().required('Campo requerido'),
+  fecha_evaluacion: Yup.date().required('Campo requerido'),
+})
 
 const validate = (values) => {
   const errors = {};
@@ -77,11 +88,12 @@ export default function FichaSociodemo () {
       ape_materno: '',
       sexo: '',
       fecha_nacimiento: null,
-      fecha_evaluacion: null,
+      fecha_evaluacion: dayjs(),
     },
     onSubmit: async (values)=>{
       console.log(`SUBMIT: \n${JSON.stringify(values)}`)
-      const submitForm = await fetch(`${BACK_URL}/insertar_paciente`, {
+      try {
+        const submitForm = await fetch(`${BACK_URL}/insertar_paciente`, {
           method: 'POST',
           headers: {
             Accept: "application/json",
@@ -89,7 +101,13 @@ export default function FichaSociodemo () {
           },
           body: JSON.stringify(null)
         })
+        const result =await submitForm.json();//Puede generar el error
+        console.log(result)
+      } catch (error) {
+        toast.error('Error al enviar la información')
       }
+    },
+    validationSchema: FormSchema
   })
 
   const navigate = useNavigate();
@@ -99,13 +117,7 @@ export default function FichaSociodemo () {
     setEdadCalculada(null)
   }, [])
   
-  /*
-  const handleFechaNacimiento = (newValue) => {
-    console.log(`Fecha nacimiento newValue ${newValue}`)
-    setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
-    set_fecha_nacimiento(newValue)
-  }
-    */
+  const [fechaEvaluacion, setFechaEvaluacion] = useState(dayjs())
 
   return (
 
@@ -131,6 +143,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={dni_paciente}
             onChange={formik.handleChange}
+            error={ Boolean(formik.touched.dni_paciente && formik.errors.dni_paciente) }
+            helperText={formik.touched.dni_paciente && formik.errors.dni_paciente}
           />
           <TextField
             margin='normal'
@@ -142,6 +156,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={nombres}
             onChange={formik.handleChange}
+            error={ Boolean(formik.touched.nombres && formik.errors.nombres) }
+            helperText={formik.touched.nombres && formik.errors.nombres}
           />
           <TextField 
             margin='normal'
@@ -153,6 +169,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={ape_paterno}
             onChange={formik.handleChange}
+            error={ Boolean(formik.touched.ape_paterno && formik.errors.ape_paterno) }
+            helperText={formik.touched.ape_paterno && formik.errors.ape_paterno}
           />
           <TextField 
             margin='normal'
@@ -164,6 +182,8 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={ape_materno}
             onChange={formik.handleChange}
+            error={ Boolean(formik.touched.ape_materno && formik.errors.ape_materno) }
+            helperText={formik.touched.ape_materno && formik.errors.ape_materno}
           />
 
           <Box fullWidth style={styles.formEle}>
@@ -172,7 +192,10 @@ export default function FichaSociodemo () {
               <Select
                 labelId="lbl-sexo"
                 label="Sexo"
+                required
                 onChange={formik.handleChange("sexo")}
+                error={ Boolean(formik.touched.sexo && formik.errors.sexo) }
+                helperText={formik.touched.sexo && formik.errors.sexo}
               >
                 {
                   sexoOptions.map((ele) => 
@@ -189,11 +212,15 @@ export default function FichaSociodemo () {
               
               <DatePicker
                 label="Fecha de Nacimiento"
-                //value={fecha_nacimiento}
+                format='DD-MM-YYYY'
+                required
                 onChange={(newValue) =>{
                   console.log(`FECHA NACIMIENTO: ${newValue}`)
                   formik.setFieldValue("fecha_nacimiento", newValue)
+                  setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
                 }}
+                slotProps={{ textField: { required: true }}}
+                disableFuture
               />
             </LocalizationProvider>
             <FormHelperText>Edad: {edadCalculada}</FormHelperText>
@@ -204,9 +231,9 @@ export default function FichaSociodemo () {
               {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
               
               <DatePicker 
-                label="Fecha de evaluacion" 
-                value={dayjs(new Date, "MM-DD-YYYY")}
-                
+                label="Fecha de evaluacion"
+                format='DD-MM-YYYY'
+                value={fechaEvaluacion}
                 disabled 
               />
             </LocalizationProvider>
