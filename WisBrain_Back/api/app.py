@@ -22,8 +22,8 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+#/log = logging.getLogger('werkzeug')
+#log.setLevel(logging.ERROR)
 
 # Inicializar la clase Arduino, Tarjetas y Validador
 # arduino = Arduino('COM5')
@@ -105,20 +105,21 @@ def resume():
     return jsonify({"mensaje": "se renaudo la deteccion"})
 
 
-@app.route('/insertarPaciente', methods=['POST'])
+@app.route('/insertar_paciente', methods=['POST'])
+@cross_origin() ##ojito
 def insertar_paciente():
     try:
         db = get_db()
         cursor = db.cursor()
 
         data = request.get_json()
-        validador.fechaEvaluacion = data.get('fecha_evaluacion')
+        validador.fechaEvaluacion = data.get('fecha_evaluacion')[:10]
         dni_paciente = data.get('dni_paciente')
         nombres = data.get('nombres')
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
-        fecha_nacimiento = data.get('fecha_nacimiento')
-        genero = data.get('sexo')
+        fecha_nacimiento = data.get('fecha_nacimiento')[:10]
+        sexo = data.get('sexo')
 
         cursor.execute("""
             INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, sexo)

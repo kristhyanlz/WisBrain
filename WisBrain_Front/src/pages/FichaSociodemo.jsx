@@ -77,10 +77,33 @@ export default function FichaSociodemo () {
             Accept: "application/json",
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(null)
+          body: JSON.stringify({
+            dni_paciente: values.dni_paciente,
+            nombres: values.nombres,
+            ape_paterno: values.ape_paterno,
+            ape_materno: values.ape_materno,
+            sexo: values.sexo,
+            fecha_nacimiento: values.fecha_nacimiento,
+            fecha_evaluacion: values.fecha_evaluacion
+          })
         })
-        const result =await submitForm.json();//Puede generar el error
-        console.log(result)
+        //const result =await submitForm.json();//Puede generar el error
+        //console.log(result)
+        //toast.success('Información guardada correctamente')
+
+        if (!submitForm.ok) {
+          if (submitForm.status === 500) {
+            const errorData = await submitForm.json();
+            toast.error('El paciente ya realizo el test');
+          } else {
+            toast.error('Error en la solicitud');
+          }
+        } else {
+          const result = await submitForm.json();
+          console.log(result);
+          toast.success('Información guardada correctamente');
+        }
+
       } catch (error) {
         toast.error('Error al enviar la información')
       }
