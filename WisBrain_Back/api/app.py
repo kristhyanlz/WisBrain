@@ -6,6 +6,11 @@ from flask_cors import CORS, cross_origin
 from threading import Thread
 import simpleaudio as sa
 
+import sys
+from pathlib import Path
+path = Path().absolute()
+sys.path.append(str(path))
+
 from WisBrain_Back.service.Arduino import Arduino
 from WisBrain_Back.service.Validador import Validador
 from WisBrain_Back.service.Tarjetas import Tarjetas
@@ -17,6 +22,7 @@ from WisBrain_Back.service.TecladoListener import TecladoListener
 import logging
 
 #python -m flask run
+#python -m flask --app ./WisBrain_Back/api/app.py run
 
 app = Flask(__name__)
 cors = CORS(app)
