@@ -1,6 +1,10 @@
 import React, { useState } from "react";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DescriptionIcon from '@mui/icons-material/Description';
 import {
   Button,
+  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,6 +18,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
   Paper,
   Box,
   Grid,
@@ -38,10 +43,13 @@ const generateRandomMovements = () => {
   return randomData;
 };
 
+const centerCols = {setCellHeaderProps: () => ({ align: 'center' }),
+setCellProps: () => ({ align: 'center' })}
+
 const columns = (handleEdit, handleDelete, handleTest) => [
   {
     name: "DNI",
-    options: { filter: true },
+    options: { filter: true},
   },
   {
     name: "Nombres",
@@ -57,11 +65,11 @@ const columns = (handleEdit, handleDelete, handleTest) => [
   },
   {
     name: "Fecha de Nacimiento",
-    options: { filter: true },
+    options: { filter: true},
   },
   {
     name: "Fecha de Evaluación",
-    options: { filter: true },
+    options: { filter: true},
   },
   {
     name: "ACCIÓN",
@@ -69,29 +77,18 @@ const columns = (handleEdit, handleDelete, handleTest) => [
       filter: false,
       sort: false,
       empty: true,
+      ...centerCols,
       customBodyRender: (value, tableMeta, updateValue) => {
         return (
           <>
-            <Button onClick={(e) => handleEdit(e, tableMeta)}>Edit</Button>
-            <Button color="error" onClick={(e) => handleDelete(e, tableMeta)}>Delete</Button>
-            <Button color="secondary" variant="outlined" style={{ margin: "0 0 0 10px" }} onClick={(e) => handleTest(e, tableMeta)}>Test</Button>
+            <IconButton onClick={(e) => handleEdit(e, tableMeta)}><EditIcon/></IconButton>
+            <IconButton color="secondary" variant="outlined" onClick={(e) => handleTest(e, tableMeta)}><DescriptionIcon/></IconButton>
           </>
         );
       },
     },
   },
 ];
-
-const options = {
-  filter: true,
-  filterType: "dropdown",
-  responsive: "stacked",
-  page: 2,
-  onColumnSortChange: (changedColumn, direction) => console.log("changedColumn: ", changedColumn, "direction: ", direction),
-  onChangeRowsPerPage: (numberOfRows) => console.log("numberOfRows: ", numberOfRows),
-  onChangePage: (currentPage) => console.log("currentPage: ", currentPage),
-  onRowClick: (e) => window.alert("ROW clicked"),
-};
 
 export default function Pacientes() {
   const [data, setData] = useState(dataPacientes);
@@ -155,7 +152,7 @@ export default function Pacientes() {
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>Confirmar Eliminación</DialogTitle>
             <DialogContent>
-              <DialogContentText>Estas seguro de eliminar a este paciente: <br /> {currentRow[1]} - {currentRow[0]}</DialogContentText>
+              <DialogContentText>¿Estás seguro?</DialogContentText>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose}>Cancelar</Button>
@@ -171,9 +168,9 @@ export default function Pacientes() {
       case "edit":
         return (
           <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Edit Patient</DialogTitle>
+            <DialogTitle>Editar Paciente</DialogTitle>
             <DialogContent>
-              <TextField margin="dense" name="DNI" label="DNI" type="text" fullWidth value={editValues.DNI} onChange={handleInputChange} />
+              <TextField disabled margin="dense" name="DNI" label="DNI" type="text" fullWidth value={editValues.DNI} onChange={handleInputChange} />
               <TextField margin="dense" name="Nombres" label="Nombres" type="text" fullWidth value={editValues.Nombres} onChange={handleInputChange} />
               <TextField margin="dense" name="Apellidos" label="Apellidos" type="text" fullWidth value={editValues.Apellidos} onChange={handleInputChange} />
               <TextField margin="dense" name="Sexo" label="Sexo" type="text" fullWidth value={editValues.Sexo} onChange={handleInputChange} />
@@ -189,7 +186,7 @@ export default function Pacientes() {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
+              <Button onClick={handleClose}>Cancelar</Button>
               <Button
                 onClick={() => {
                   const updatedData = data.map((row) => {
@@ -210,7 +207,7 @@ export default function Pacientes() {
                 }}
                 color="primary"
               >
-                Update
+                Actualizar
               </Button>
             </DialogActions>
           </Dialog>
@@ -219,7 +216,7 @@ export default function Pacientes() {
         return (
           <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
             <DialogContent>
-              <Test patientName={currentRow[1]} patientDni={currentRow[0]} evaluationDate={currentRow[5]} />
+              <Test patientName={`${currentRow[1]} ${currentRow[2]}`} patientDni={currentRow[0]} evaluationDate={currentRow[5]} />
               <Box mt={3}>
                 <h2>Resultado del test</h2>
                 <Resultados />
@@ -233,6 +230,32 @@ export default function Pacientes() {
       default:
         return null;
     }
+  };
+
+  const options = {
+    filter: true,
+    filterType: "dropdown",
+    responsive: "stacked",
+    page: 0,
+    onColumnSortChange: (changedColumn, direction) => console.log("changedColumn: ", changedColumn, "direction: ", direction),
+    onChangeRowsPerPage: (numberOfRows) => console.log("numberOfRows: ", numberOfRows),
+    textLabels: {
+      body: {
+        noMatch: "Lo sentimos, no se encontraron registros",
+        toolTip: "Ordenar",
+      },
+      selectedRows: {
+        text: "usuario(s) seleccionado(s)",
+        delete: "Eliminar",
+        deleteAria: "Usuario eliminado",
+      },
+    },
+    onChangePage: (currentPage) => console.log("currentPage: ", currentPage),
+    onRowsDelete: (rowsDeleted) => {
+      console.log("rowsDeleted: ", rowsDeleted)
+      setModalType("delete");
+      setOpen(true);
+    },
   };
 
   return (
@@ -254,8 +277,15 @@ const Test = ({ patientName, patientDni, evaluationDate }) => {
   return (
     <>
       <Box sx={{ padding: 2, textAlign: "center" }}>
-        <h2 sx={{ textAlign: "center" }}>Historial de movimientos </h2>
-        <h2>{patientName} - {patientDni} - {evaluationDate}</h2>
+        <Typography textAlign= "center" fontFamily= 'monospace' letterSpacing='.3rem' fontSize={25} marginBottom={3}>Resultados </Typography>
+        <Grid container spacing={2} sx={{justifyContent:'space-between'}}>
+          <Grid item>
+            <Typography fontFamily='roboto'>{patientName} ({patientDni})</Typography>
+          </Grid>
+          <Grid item>
+            <Typography fontFamily='roboto'>{evaluationDate}</Typography>
+          </Grid>
+        </Grid>
       </Box>
       <Paper>
         <TableContainer>
