@@ -1,11 +1,12 @@
 import serial
 
-class Arduino:
+class  Arduino:
     def __init__(self, port, baud_rate=9600):
         self.puerto_serial = serial.Serial(port, baud_rate)
         self.recibido = {"A": True, "B": True, "C": True, "D": True}
         self.resultados_validacion = []
         self.lock = False
+        self.escucha = True
 
     def enviar_dato(self, dato):
         # Enviar dato al Arduino
@@ -29,7 +30,7 @@ class Arduino:
             self.recibido[dato[0]] = estado
             if estado:
                 self.lock = True
-                resultado_validacion = validador.validar({"A": 0, "B": 1, "C": 2, "D": 3}[dato[0]])
+                resultado_validacion = validador.validar({"A": 3, "B": 2, "C": 1, "D": 0}[dato[0]])
                 resultado_validacion = resultado_validacion.copy()
                 resultado_validacion['datos_tarjeta'] = resultado_validacion['datos_tarjeta'].copy()
                 info = '1' if (resultado_validacion['resultado'] == 'CORRECTO') else '0'
@@ -38,5 +39,5 @@ class Arduino:
                 self.resultados_validacion.append(resultado_validacion)
 
     def recibir_datos_continuamente(self, validador):
-        while True:
+        while self.escucha:
             self.recibir_datos(validador)

@@ -8,6 +8,7 @@ import simpleaudio as sa
 
 import sys
 from pathlib import Path
+
 path = Path().absolute()
 sys.path.append(str(path))
 
@@ -31,13 +32,20 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 #/log = logging.getLogger('werkzeug')
 #log.setLevel(logging.ERROR)
 
-# Inicializar la clase Arduino, Tarjetas y Validador
+# Inicializar las variables
 # arduino = Arduino('COM5')
-tarjetas = Tarjetas()
+'''
 validadorEntrada = ValidadorEntradaDB()
 validador = Validador(tarjetas)
 teclado_listener = TecladoListener(validador)
+resultado = []'''
+
+tarjetas = Tarjetas()
+arduino = None
+validador = None
+#teclado_listener = None
 resultado = []
+escucha_thread = None
 audioSiguiente = sa.WaveObject.from_wave_file("WisBrain_Back/assets/siguiente.wav")
 
 
@@ -66,15 +74,15 @@ def close_connection(exception):
 
 # Método para iniciar el escucha de datos del Arduino
 def iniciar_escucha():
-    #global arduino
-    global teclado_listener
-    #arduino.recibir_datos_continuamente(validador)
-    teclado_listener.escuchar_teclado()
+    global arduino
+    #global teclado_listener
+    arduino.recibir_datos_continuamente(validador)
+    #teclado_listener.escuchar_teclado()
 
 
 # Iniciar el escucha en un hilo separado
-escucha_thread = Thread(target=iniciar_escucha)
-escucha_thread.start()
+#escucha_thread = Thread(target=iniciar_escucha)
+#escucha_thread.start()
 
 
 @app.route('/', methods=['GET'])
@@ -83,15 +91,41 @@ def hello_world():
     return 'Hello Wis!'
 
 
+@app.route('/iniciar_test', methods=['GET'])
+@cross_origin()
+def iniciar_test():
+    #global teclado_listener
+    global arduino
+    global validador, resultado, escucha_thread
+
+    # Inicializar las variables globales
+    arduino = Arduino('COM5')
+    validador = Validador(tarjetas)
+    #teclado_listener = TecladoListener(validador)
+    resultado = []
+
+    # Iniciar el hilo de escucha
+    escucha_thread = Thread(target=iniciar_escucha)
+    escucha_thread.start()
+
+    return jsonify({"status": "Test iniciado"}), 200
+
+
+# Endpoint para terminar el test
+@app.route('/finalizar_test', methods=['GET'])
+@cross_origin()
+def finalizar_test():
+    return finalizarTest()
+
+
 @app.route('/getUpdate', methods=['GET'])
 @cross_origin()
 def get_update():
-    #global arduino, resultado
-    global resultado, teclado_listener, validador
+    global arduino, resultado
+    #global resultado, teclado_listener, validador
 
-    #resultado = arduino.resultados_validacion
-    resultado = teclado_listener.resultados_validacion
-    # Devuelve la lista completa de resultados
+    resultado = arduino.resultados_validacion
+    #resultado = teclado_listener.resultados_validacion
     return jsonify(resultado)
 
 
@@ -99,20 +133,23 @@ def get_update():
 @app.route('/resume', methods=['GET'])
 @cross_origin()
 def resume():
-    #global arduino
-    global teclado_listener, resultado
+    global arduino, resultado
+    #global teclado_listener, resultado
     if len(resultado) == 48:
-
+        finalizarTest()
         return jsonify({"mensaje: se termino el TEST"})
+
     thread = threading.Thread(target=reproducir_audio)
-    # Iniciar el hilo
     thread.start()
-    teclado_listener.lock = True
+
+    arduino.lock = False
+    #teclado_listener.lock = True
+
     return jsonify({"mensaje": "se renaudo la deteccion"})
 
 
 @app.route('/insertar_paciente', methods=['POST'])
-@cross_origin() ##ojito
+@cross_origin()  ##ojito
 def insertar_paciente():
     try:
         db = get_db()
@@ -160,6 +197,7 @@ def insertarHistorial():
         return jsonify({'message': 'Historial insertado correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/devolverResultadosHistorialPaciente/<dni_paciente>', methods=['GET'])
 @cross_origin()
@@ -313,6 +351,7 @@ def actualizarPaciente():
     finally:
         cursor.close()
 
+
 def insertarTEST(observaciones):
     global validador, resultado
     db = get_db()
@@ -337,6 +376,7 @@ def insertarTEST(observaciones):
 
     db.commit()
     cursor.close()
+
 
 def insertarMOVS():
     global validador, resultado
@@ -363,6 +403,26 @@ def insertarMOVS():
 
     db.commit()
     cursor.close()
+
+
+def finalizarTest():
+    global arduino, escucha_thread, resultado, validador
+    if arduino:
+        arduino.escucha = False
+        if escucha_thread:
+            escucha_thread.join()
+            escucha_thread = None
+            arduino = None
+            validador = None
+            # teclado_listener = None
+            resultado = []
+            escucha_thread = None
+            print("ENTRE")
+        return jsonify({"status": "Escuchador detenido"}), 200
+    else:
+        return jsonify({"error": "Arduino no inicializado"}), 400
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
