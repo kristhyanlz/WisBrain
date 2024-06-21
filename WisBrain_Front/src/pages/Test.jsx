@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useState, useEffect, useRef} from 'react'
-import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
+import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from '@mui/material';
 import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
@@ -124,14 +124,15 @@ export default function Test() {
         </Grid>
       </Grid>
       <Box style={{textAlign: 'center', paddingBottom: 20}}>
-        <Button
-          variant='contained'
-          endIcon={<ContinuarIcon/>}
-          onClick={continuarFx} 
-          sx={{paddingTop:2, paddingBottom: 2, paddingRight: 4, paddingLeft: 4}} 
-        >
-          Siguiente
-        </Button>
+        <Tooltip title="Atajo: Barra Espaciadora [SPACEBAR]" arrow>
+          <Button
+            variant='contained'
+            endIcon={<ContinuarIcon/>}
+            onClick={continuarFx} 
+          >
+            Siguiente
+          </Button>
+        </Tooltip>
       </Box>
 
       <Paper sx={{ width: '100%' }}>
