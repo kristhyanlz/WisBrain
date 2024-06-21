@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useState, useEffect} from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -17,7 +17,7 @@ import PsychologyIcon  from '../assets/logo.png';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -34,6 +34,8 @@ const lightTheme = createTheme({
   },
 });
 
+const negrita = { fontWeight: 'bold' }
+
 const pages = [
   {text: 'Historial', link:'/Pacientes'},
   {text: 'Ficha Sociodemografica', link: '/FichaSociodemografica'},
@@ -44,12 +46,17 @@ const pages = [
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Barra( {children}) {
-  const [currentTheme, setCurrentTheme] = React.useState('dark');
+  const location = useLocation();
+  const [currentTheme, setCurrentTheme] = useState('dark');
+  const [testEnable, setTestEnable] = useState(false);
+
+  useEffect(() => {
+    setTestEnable(localStorage.getItem('testEnable') === 'true')
+  }, [location.pathname])
 
   const navigate = useNavigate();
 
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -63,6 +70,7 @@ function Barra( {children}) {
     handleCloseNavMenu()
     navigate(link)
   }
+
   //<ThemeProvider theme={darkTheme}>
   return (
     <ThemeProvider theme={ (currentTheme == 'dark') ? darkTheme: lightTheme}>
@@ -119,11 +127,15 @@ function Barra( {children}) {
               }}
             >
               {//Estrecho, flotante
-              pages.map((ele) => (
-                <MenuItem key={ele.text} onClick={() => { handleClickPages(ele.link)}}>
-                  <Typography textAlign="center">{ele.text}</Typography>
-                </MenuItem>
-              ))}
+                pages.map((ele) => {
+                  const isActive = ele.link == location.pathname;
+                  return (
+                    <MenuItem key={ele.text} disabled={ele.link == '/Test' && !testEnable} onClick={() => { handleClickPages(ele.link)}}>
+                      <Typography textAlign="center" fontWeight={isActive?"bold":"regular"} fontSize={isActive?18:"default"}>{ele.text}</Typography>
+                    </MenuItem>
+                  )
+                })
+              }
             </Menu>
           </Box>
           <img src={PsychologyIcon} width={90} style={{paddingRight:10}} />
@@ -148,21 +160,25 @@ function Barra( {children}) {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {//Fullscreen
-            pages.map((ele) => (
-              <Button
-                key={ele.text}
-                onClick={() => { handleClickPages(ele.link)}}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {ele.text}
-              </Button>
-            ))}
+              pages.map((ele) => {
+                const isActive = ele.link == location.pathname;
+                return (
+                <Button
+                  key={ele.text}
+                  disabled={(ele.link == '/Test' && !testEnable) || (ele.link == '/FichaSociodemografica' && testEnable)}
+                  onClick={() => { handleClickPages(ele.link)}}
+                  sx={{ my: 2, color: 'white', display: 'block', fontWeight:isActive?"bold":"regular", fontSize:isActive?18:'default'}}
+                >
+                  {ele.text}
+                </Button>
+                )
+              })
+            }
           </Box>
             
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Cambiar tema " >
               <IconButton sx={{ my: 2, color: 'white', display: 'block' }} onClick={ (event) => {
-                setAnchorElUser(event.currentTarget)
                 if(currentTheme == 'dark'){
                   setCurrentTheme('light');
                 }else{

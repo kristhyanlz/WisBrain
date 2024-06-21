@@ -23,6 +23,7 @@ import logging
 
 #python -m flask run
 #python -m flask --app ./WisBrain_Back/api/app.py run
+#sudo apt-get install -y python3-dev libasound2-dev
 
 app = Flask(__name__)
 cors = CORS(app)
