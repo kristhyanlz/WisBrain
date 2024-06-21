@@ -119,6 +119,7 @@ def iniciarTest():
 @app.route('/finalizar_test', methods=['GET'])
 @cross_origin()
 def finalizar_test():
+
     return finalizarTest()
 
 
@@ -151,6 +152,24 @@ def resume():
 
     return jsonify({"mensaje": "se renaudo la deteccion"})
 
+@app.route('/devolver_resumen', methods=['GET'])
+@cross_origin()
+def devolver_resumen():
+    global validador
+    try:
+        result = {
+            "num_cat_correctas": validador.numCatCorrectas,
+            "num_err_perseverativos": validador.erroresPerseverativos,
+            "num_err_no_perseverativos": validador.erroresNoPerseverativos,
+            "num_total_errores": validador.totalErrores,
+            "porcentaje_errores_perseverativos": (validador.erroresPerseverativos / 48) * 100,
+            "fecha_test": validador.fechaEvaluacion,
+            "resultado_test": "Bueno" #la fe
+        }
+
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/insertar_paciente', methods=['POST'])
 @cross_origin()  ##ojito
