@@ -94,14 +94,19 @@ def hello_world():
 @app.route('/iniciar_test', methods=['GET'])
 @cross_origin()
 def iniciar_test():
-    #global teclado_listener
+
+    return iniciarTest()
+
+
+def iniciarTest():
+    # global teclado_listener
     global arduino
     global validador, resultado, escucha_thread
 
     # Inicializar las variables globales
     arduino = Arduino('COM5')
     validador = Validador(tarjetas)
-    #teclado_listener = TecladoListener(validador)
+    # teclado_listener = TecladoListener(validador)
     resultado = []
 
     # Iniciar el hilo de escucha
@@ -109,7 +114,6 @@ def iniciar_test():
     escucha_thread.start()
 
     return jsonify({"status": "Test iniciado"}), 200
-
 
 # Endpoint para terminar el test
 @app.route('/finalizar_test', methods=['GET'])
@@ -152,6 +156,9 @@ def resume():
 @cross_origin()  ##ojito
 def insertar_paciente():
     try:
+
+        iniciarTest()
+
         db = get_db()
         cursor = db.cursor()
 
@@ -171,9 +178,11 @@ def insertar_paciente():
 
         db.commit()
         cursor.close()
+        #ojito
 
         return jsonify({'message': 'Paciente insertado correctamente'}), 200
     except Exception as e:
+        finalizarTest()
         return jsonify({'error': str(e)}), 500
 
 
