@@ -1,12 +1,11 @@
 import * as React from 'react';
 import {useState, useEffect, useRef} from 'react'
-import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from '@mui/material';
 import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
 
-import correctoAudio from  '../assets/correcto.mp3'
-import incorrectoAudio from '../assets/incorrecto.mp3'
 
 import ContinuarIcon from '@mui/icons-material/PlayArrow';
 
@@ -36,9 +35,7 @@ const columns = [
 ];
 
 export default function Test() {
-  //const [correctoPlayer] = useState(new Audio( correctoAudio ))
-  //const [incorrectoPlayer] = useState(new Audio( incorrectoAudio ))
-
+  const navigate = useNavigate();
   const tableRef = useRef(null);
 
   const [movimientos, setMovimientos] = useState([
@@ -55,9 +52,11 @@ export default function Test() {
     }
   ])
   
-  const [flag, setFlag] = useState(false)
   useEffect(()=> {
-    
+    if (localStorage.getItem('testEnable') != 'true'){
+      navigate('/FichaSociodemografica')
+    }
+
     const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
@@ -73,7 +72,7 @@ export default function Test() {
         })
     }, 1000)
     
-  }, [flag])
+  }, [])
 
   const [flagPlayer, setFlagPlayer] = useState(0)
   useEffect(()=> {
@@ -124,14 +123,15 @@ export default function Test() {
         </Grid>
       </Grid>
       <Box style={{textAlign: 'center', paddingBottom: 20}}>
-        <Button
-          variant='contained'
-          endIcon={<ContinuarIcon/>}
-          onClick={continuarFx} 
-          sx={{paddingTop:2, paddingBottom: 2, paddingRight: 4, paddingLeft: 4}} 
-        >
-          Siguiente
-        </Button>
+        <Tooltip title="Atajo: Barra Espaciadora [SPACEBAR]" arrow>
+          <Button
+            variant='contained'
+            endIcon={<ContinuarIcon/>}
+            onClick={continuarFx} 
+          >
+            Siguiente
+          </Button>
+        </Tooltip>
       </Box>
 
       <Paper sx={{ width: '100%' }}>

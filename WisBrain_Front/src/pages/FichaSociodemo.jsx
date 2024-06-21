@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik, useField } from 'formik';
 import * as Yup from 'yup';
-import { useFetcher, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import {Box, FormControl, TextField, InputLabel, Input, Select, MenuItem, Button, FormHelperText, Container, Grid } from '@mui/material';
 
@@ -98,6 +98,7 @@ export default function FichaSociodemo () {
         } else {
           const result = await submitForm.json();
           console.log(result);
+          localStorage.setItem('testEnable', 'true')
           toast.success('Información guardada correctamente');
           navigate('/Test')
         }
@@ -111,6 +112,9 @@ export default function FichaSociodemo () {
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
+    if (localStorage.getItem('testEnable') === 'true'){
+      navigate('/Test')
+    }
     setEdadCalculada(null)
   }, [])
   
