@@ -35,7 +35,7 @@ export default function Resultados() {
   console.log(JSON.stringify(rows))
   return (
     <Container maxWidth='sm' style={styles.container}>
-      <TableContainer >
+      <TableContainer component={Paper}  >
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
