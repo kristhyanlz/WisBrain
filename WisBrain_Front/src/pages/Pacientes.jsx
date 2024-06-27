@@ -259,7 +259,7 @@ export default function Pacientes() {
   };
 
   return (
-    <Container maxWidth='md' sx={{marginTop:3}}>
+    <Container maxWidth='lg' sx={{marginTop:3}}>
       <MUIDataTable
         title={"LISTA DE PACIENTES"}
         data={data}
