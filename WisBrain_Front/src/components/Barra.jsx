@@ -48,7 +48,9 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Barra( {children}) {
   const location = useLocation();
-  const [currentTheme, setCurrentTheme] = useState('dark');
+  //Cambiar tema predeterminado light/dark
+  const [currentTheme, setCurrentTheme] = useState('light');
+
   const [testEnable, setTestEnable] = useState(false);
 
   useEffect(() => {
