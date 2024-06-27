@@ -259,7 +259,7 @@ export default function Pacientes() {
   };
 
   return (
-    <div>
+    <Container maxWidth='md' sx={{marginTop:3}}>
       <MUIDataTable
         title={"LISTA DE PACIENTES"}
         data={data}
@@ -267,7 +267,7 @@ export default function Pacientes() {
         options={options}
       />
       {renderDialog()}
-    </div>
+    </Container>
   );
 }
 

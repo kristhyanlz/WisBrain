@@ -80,13 +80,13 @@ function Barra( {children}) {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box sx={{ display:{xs: 'none', md:'flex'} }}>
-            <img src={PsychologyIcon} width={80} style={{paddingRight:10}} />
+            <img src={PsychologyIcon} width={80} style={{paddingRight:0}} />
           </Box>
           <Typography
             variant="h6"
             noWrap
             sx={{
-              mr: 2,
+              mr: 0,
               display: { xs: 'none', md: 'flex' },
               fontFamily: 'monospace',
               fontWeight: 700,
@@ -186,7 +186,7 @@ function Barra( {children}) {
             
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Cambiar tema " >
-              <IconButton sx={{ my: 2, color: 'white', display: 'block' }} onClick={ (event) => {
+              <IconButton sx={{ my: 2, marginLeft:5, color: 'white', display: 'block' }} onClick={ (event) => {
                 if(currentTheme == 'dark'){
                   setCurrentTheme('light');
                 }else{

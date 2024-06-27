@@ -20,7 +20,8 @@ const styles = {
   container: {
     // display: 'flex',
     flexDirection: 'row',
-    justifyItems: 'center'
+    justifyItems: 'center',
+    marginTop: 20,
   },
   obs:{
     marginTop:20
