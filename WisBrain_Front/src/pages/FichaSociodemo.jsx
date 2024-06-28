@@ -35,7 +35,8 @@ const styles = {
     fontFamily: 'Candara',
   },
   formEle: {
-    padding: 10
+    paddingHorizontal: 10,
+    paddingTop: 10,
   }
 };
 
@@ -145,8 +146,9 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={dni_paciente}
             onChange={formik.handleChange}
-            error={formik.errors.dni_paciente}
-            helperText={formik.errors.dni_paciente}
+            onBlur={formik.handleBlur}
+            error={formik.touched.dni_paciente && Boolean(formik.errors.dni_paciente)}
+            helperText={formik.touched.dni_paciente && formik.errors.dni_paciente}
           />
           <TextField
             margin='normal'
@@ -158,8 +160,9 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={nombres}
             onChange={formik.handleChange}
-            error={formik.errors.nombres}
-            helperText={formik.errors.nombres}
+            onBlur={formik.handleBlur}
+            error={formik.touched.nombres && Boolean(formik.errors.nombres)}
+            helperText={formik.touched.nombres && formik.errors.nombres}
           />
           <TextField 
             margin='normal'
@@ -171,8 +174,9 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={ape_paterno}
             onChange={formik.handleChange}
-            error={formik.errors.ape_paterno }
-            helperText={formik.errors.ape_paterno}
+            onBlur={formik.handleBlur}
+            error={formik.touched.ape_paterno && Boolean(formik.errors.ape_paterno)}
+            helperText={formik.touched.ape_paterno && formik.errors.ape_paterno}
           />
           <TextField 
             margin='normal'
@@ -184,19 +188,22 @@ export default function FichaSociodemo () {
             variant="filled"
             //value={ape_materno}
             onChange={formik.handleChange}
-            error={formik.errors.ape_materno}
-            helperText={formik.errors.ape_materno}
+            onBlur={formik.handleBlur}
+            error={formik.touched.ape_materno && Boolean(formik.errors.ape_materno)}
+            helperText={formik.touched.ape_materno && formik.errors.ape_materno}
           />
 
-          <Box fullWidth style={styles.formEle}>
+          <Box fullWidth style={{...styles.formEle, paddingTop: 25}}>
             <FormControl fullWidth >
               <InputLabel id="lbl-sexo">Sexo</InputLabel>        
               <Select
                 labelId="lbl-sexo"
                 label="Sexo"
+                name='sexo'
                 required
                 onChange={formik.handleChange("sexo")}
-                error={formik.errors.sexo}
+                onBlur={formik.handleBlur}
+                error={formik.touched.sexo && Boolean(formik.errors.sexo)}
                 helperText={formik.errors.sexo}
               >
                 {
@@ -205,28 +212,43 @@ export default function FichaSociodemo () {
                   )
                 }
               </Select>
+              <FormHelperText error={formik.touched.sexo && Boolean(formik.errors.sexo)}>{formik.touched.sexo && formik.errors.sexo}</FormHelperText>
             </FormControl>
           </Box>
 
-          <FormControl fullWidth style={{...styles.formEle, paddingBottom:20}}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
-              
-              <DatePicker
-                label="Fecha de Nacimiento"
-                format='DD-MM-YYYY'
-                required
-                onChange={(newValue) =>{
-                  console.log(`FECHA NACIMIENTO: ${newValue}`)
-                  formik.setFieldValue("fecha_nacimiento", newValue)
-                  setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
-                }}
-                slotProps={{ textField: { required: true }}}
-                disableFuture
-              />
-            </LocalizationProvider>
-            <FormHelperText>Edad: {edadCalculada}</FormHelperText>
-          </FormControl>
+          <Grid container spacing={2} style={{paddingTop: 20, paddingBottom:20, flex: 1}}>
+            <Grid item xs={9}>
+              <FormControl fullWidth >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  {/* <DatePicker value={value} onChange={(newValue) => setValue(newValue)} /> */}
+                  
+                  <DatePicker
+                    label="Fecha de Nacimiento"
+                    format='DD-MM-YYYY'
+                    required
+                    onChange={(newValue) =>{
+                      console.log(`FECHA NACIMIENTO: ${newValue}`)
+                      formik.setFieldValue("fecha_nacimiento", newValue)
+                      setEdadCalculada(dayjs().diff(dayjs(newValue), 'year'))
+                    }}
+                    onBlur={formik.handleBlur}
+                    slotProps={{ textField: { required: true }}}
+                    disableFuture
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                label="Edad"
+                
+                value={`${edadCalculada == null ? '' : edadCalculada}`}
+                disabled
+                fullWidth
+              >
+              </TextField>
+            </Grid>
+          </Grid>
 
           <FormControl fullWidth style={styles.formEle}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
