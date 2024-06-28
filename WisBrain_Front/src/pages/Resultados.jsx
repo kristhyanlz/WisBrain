@@ -13,14 +13,15 @@ const rows = [
   {calificacion: 'Número de errores perseverativos', puntaje: 20},
   {calificacion: 'Número de errores NO perseverativos', puntaje: 25},
   {calificacion: 'Número total de errores', puntaje: 40},
-  {calificacion: 'Porcentaje de errores de perseveraciones', puntaje: '30%'},
+  {calificacion: 'Porcentaje de errores perseverativos', puntaje: '30%'},
 ];
 
 const styles = {
   container: {
-    // display: 'flex',
-    flexDirection: 'row',
-    justifyItems: 'center'
+    //display: 'flex',
+    //flexDirection: 'row',
+    justifyItems: 'center',
+    marginTop: 20,
   },
   obs:{
     marginTop:20
@@ -33,12 +34,12 @@ const styles = {
 export default function Resultados() {
   console.log(JSON.stringify(rows))
   return (
-    <Container style={styles.container}>
-      <TableContainer component={Paper} >
-        <Table sx={{ minWidth: 650}} aria-label="simple table">
+    <Container maxWidth='sm' style={styles.container}>
+      <TableContainer component={Paper}  >
+        <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Calificacion</TableCell>
+              <TableCell>Calificación</TableCell>
               <TableCell align="center">Puntaje Bruto</TableCell>
             </TableRow>
           </TableHead>
@@ -46,7 +47,7 @@ export default function Resultados() {
             {rows.map((row) => (
               <TableRow
                 key={row.name}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                //sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
                   {row.calificacion}

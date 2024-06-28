@@ -25,7 +25,7 @@ const styles = {
     flex: 1,
     justifyContent: 'flex-start',
     paddingTop: 30,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
   },
   title:{
     textAlign: 'center',
@@ -120,8 +120,9 @@ export default function FichaSociodemo () {
   
   const [fechaEvaluacion, setFechaEvaluacion] = useState(dayjs())
 
-  return (
 
+
+  return (
     <Container maxWidth='xs' style={styles.form}>
       <div style={styles.title}>
         Información del Paciente
