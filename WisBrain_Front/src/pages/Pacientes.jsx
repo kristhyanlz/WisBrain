@@ -95,6 +95,7 @@ const Pacientes = () => {
   });
 
   const [showTest, setShowTest] = useState(false);
+  const [buttonText, setButtonText] = useState("más detalles");
 
   const handleClose = () => setOpen(false);
 
@@ -124,6 +125,8 @@ const Pacientes = () => {
     setCurrentRow(tableMeta.rowData);
     setModalType("test");
     setOpen(true);
+    setShowTest(!showTest); // Toggle the state to show or hide the test details
+    setButtonText(showTest ? "más detalles" : "ocultar detalles"); // Update button text dynamically
   };
 
   const handleInputChange = (event) => {
@@ -168,7 +171,7 @@ const Pacientes = () => {
           <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogContent>
               <Box sx={{ padding: 1, textAlign: "center" }}>
-              <Typography textAlign="center" fontFamily='fantasy' letterSpacing='.2rem' fontSize={25} marginBottom={1}>Resumen</Typography>
+                <Typography textAlign="center" fontFamily='roboto' fontWeight='bold' letterSpacing='.2rem' fontSize={25} marginBottom={1.5}>Resumen</Typography>
               </Box>
               <Grid container spacing={1} sx={{ justifyContent: 'space-around' }}>
                 <Grid item>
@@ -266,10 +269,10 @@ const Test = ({ showTest, setShowTest }) => {
   return (
     <Container maxWidth='sm'> {/* Añadido para ajustar el ancho */}
       <Paper>
-        {showTest && (
+        {!showTest && (
           <TableContainer>
             <Grid item>
-            <Typography textAlign="center" fontFamily='fantasy' letterSpacing='.2rem' fontSize={25} marginBottom={3}>Historial de movimientos</Typography>
+              <Typography textAlign="center" fontFamily='roboto' fontWeight='bold' letterSpacing='.2rem' fontSize={25} marginBottom={3}>Historial de movimientos</Typography>
             </Grid>
             <Table stickyHeader>
               <TableHead>
@@ -294,11 +297,11 @@ const Test = ({ showTest, setShowTest }) => {
           </TableContainer>
         )}
         <Grid container style={{ marginTop: 5 }} justifyContent="center">
-        <Grid item>
-          <Button variant='text' size='medium' onClick={toggleTest} style={{ fontStyle: 'italic' }}>
-            más detalles
-          </Button>
-        </Grid>
+          <Grid item>
+            <Button variant='text' size='medium' onClick={toggleTest} style={{ fontStyle: 'italic' }}>
+              {showTest ? "más detalles" : "ocultar detalles"}
+            </Button>
+          </Grid>
         </Grid>
       </Paper>
     </Container>
@@ -351,16 +354,16 @@ const Resultados = () => {
         </Table>
       </TableContainer>
       <Box style={styles.obs}>
-      <TextField
-  disabled
-  id="filled-multiline-static"
-  label={<Typography variant="h7">Observaciones y comentarios: </Typography>}
-  multiline
-  rows={5}
-  variant="filled"
-  fullWidth
-  value={`Durante el WCST, el paciente mostró habilidades iniciales para identificar patrones, aunque encontró desafíos al adaptarse a nuevas reglas. A medida que avanzaba la prueba, demostró una progresiva flexibilidad al ajustar sus estrategias según la retroalimentación proporcionada.`}
-/>
+        <TextField
+          disabled
+          id="filled-multiline-static"
+          label={<Typography variant="h7">Observaciones y comentarios: </Typography>}
+          multiline
+          rows={5}
+          variant="filled"
+          fullWidth
+          value={`Durante el WCST, el paciente mostró habilidades iniciales para identificar patrones, aunque encontró desafíos al adaptarse a nuevas reglas. A medida que avanzaba la prueba, demostró una progresiva flexibilidad al ajustar sus estrategias según la retroalimentación proporcionada.`}
+        />
       </Box>
       <Grid container style={styles.button} justifyContent="center">
         <Grid item>
