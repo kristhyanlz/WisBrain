@@ -36,7 +36,7 @@ export default function Resultados() {
   return (
     <Container maxWidth='sm' style={styles.container}>
       <TableContainer component={Paper}  >
-        <Table aria-label="simple table">
+        <Table >
           <TableHead>
             <TableRow>
               <TableCell>Calificación</TableCell>
@@ -46,7 +46,8 @@ export default function Resultados() {
           <TableBody>
             {rows.map((row) => (
               <TableRow
-                key={row.name}
+                key={row.calificacion}
+                hover
                 //sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
