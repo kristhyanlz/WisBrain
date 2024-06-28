@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useState, useEffect, useRef} from 'react'
 import { useNavigate } from 'react-router-dom';
-import {Grid, Button, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from '@mui/material';
+import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from '@mui/material';
 import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
@@ -15,10 +15,10 @@ import BACK_URL from './backURL';
 const styles = {
   title:{
     textAlign: 'center',
-    fontSize: 25,
+    fontSize: 23,
     paddingTop: 20,
     paddingBottom: 20,
-    fontFamily: 'Candara',
+    fontFamily: 'Roboto',
   },
   catEsperadas:{
     margin: '0px 10px 20px 10px'
@@ -56,7 +56,7 @@ export default function Test() {
     if (localStorage.getItem('testEnable') != 'true'){
       navigate('/FichaSociodemografica')
     }
-
+    
     const interval = setInterval( ()=> {
       fetch(`${BACK_URL}/getUpdate`)
         .then((res) => res.json())
@@ -74,17 +74,18 @@ export default function Test() {
     
   }, [])
 
-  const [flagPlayer, setFlagPlayer] = useState(0)
+  /*const [flagPlayer, setFlagPlayer] = useState(0)
   useEffect(()=> {
-    /*if (movimientos[0].categoria != ""){
+    if (movimientos[0].categoria != ""){
       if (movimientos[movimientos.length - 1].resultado == "CORRECTO"){
         correctoPlayer.play()
       }else{
         incorrectoPlayer.play()
       }
     }
-      */
+      
   }, [flagPlayer])
+  */
 
   const continuarFx = () => {
     console.log("CONTINUAR")
@@ -106,8 +107,15 @@ export default function Test() {
     };
   }, [spaceKeyListener]);
 
+  useEffect(() => {
+    if (tableRef.current) {
+      const { scrollHeight, clientHeight } = tableRef.current;
+      tableRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  }, [movimientos]);
+
   return (
-    <Paper fixed>
+    <Container fixed >
       <Box style={styles.title}>
         Categoría Esperada
       </Box>
@@ -134,49 +142,51 @@ export default function Test() {
         </Tooltip>
       </Box>
 
-      <Paper sx={{ width: '100%' }}>
-        <TableContainer sx={{ maxHeight: 440 }} ref={tableRef}>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    align={column.align}
-                    style={{ minWidth: column.minWidth }}
-                  >
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            
-            <TableBody>
-              {
-              movimientos.map((row) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                    {
-                      columns.map((column) => {
-                        const value = (column.id == 'categoria')? row.datos_tarjeta.categoria :row[column.id];
-                        let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
-                        return (
-                          <TableCell key={column.id} align={column.align}>
-                            <Box sx={es_incorrecto && {color:red[500]}}>
-                              {value}
-                            </Box>
-                          </TableCell>
-                        );
-                      })
-                    }
-                    </TableRow>
-                  );
-                })
-              }
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </Paper>
+      <Grid container justifyContent="center">
+        <Grid item>
+          <TableContainer sx={{ maxHeight: 440, minWidth:600 }} ref={tableRef}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              
+              <TableBody>
+                {
+                movimientos.map((row) => {
+                    return (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                      {
+                        columns.map((column) => {
+                          const value = (column.id == 'categoria')? row.datos_tarjeta.categoria :row[column.id];
+                          let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
+                          return (
+                            <TableCell key={column.id} align={column.align}>
+                              <Box sx={es_incorrecto && {color:red[500]}}>
+                                {value}
+                              </Box>
+                            </TableCell>
+                          );
+                        })
+                      }
+                      </TableRow>
+                    );
+                  })
+                }
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

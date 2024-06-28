@@ -105,7 +105,7 @@ def iniciarTest():
     global validador, resultado, escucha_thread
 
     # Inicializar las variables globales
-    arduino = Arduino('COM5')
+    arduino = Arduino('/dev/pts/8')
     validador = Validador(tarjetas)
     # teclado_listener = TecladoListener(validador)
     resultado = []
@@ -203,6 +203,7 @@ def insertar_paciente():
         return jsonify({'message': 'Paciente insertado correctamente'}), 200
     except Exception as e:
         finalizarTest()
+        print(f"Error al insertar paciente: {e}")
         return jsonify({'error': str(e)}), 500
 
 
