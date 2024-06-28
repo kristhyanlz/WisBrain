@@ -271,6 +271,13 @@ const Test = ({ showTest, setShowTest }) => {
       <Paper>
         {!showTest && (
           <TableContainer>
+            <Grid container style={{ marginTop: 5 }} justifyContent="center">
+          <Grid item>
+            <Button variant='text' size='medium' onClick={toggleTest} style={{ fontStyle: 'italic' }}>
+              {showTest ? "más detalles" : "ocultar detalles"}
+            </Button>
+          </Grid>
+        </Grid>
             <Grid item>
               <Typography textAlign="center" fontFamily='roboto' fontWeight='bold' letterSpacing='.2rem' fontSize={25} marginBottom={3}>Historial de movimientos</Typography>
             </Grid>
