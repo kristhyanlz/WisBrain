@@ -7,12 +7,11 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
+import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { DarkModeOutlined as DarkModeIcon, LightMode as LightModeIcon } from '@mui/icons-material';
-//import {Psychology as PsychologyIcon} from '@mui/icons-material';
 import PsychologyIcon  from '../assets/logo.png';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -21,6 +20,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+const BRAND_NAME = ''//'WisBrain';
 
 const darkTheme = createTheme({
   palette: {
@@ -38,7 +39,7 @@ const negrita = { fontWeight: 'bold' }
 
 const pages = [
   {text: 'Historial', link:'/Pacientes'},
-  {text: 'Ficha Sociodemografica', link: '/FichaSociodemografica'},
+  {text: 'Ficha S.', link: '/FichaSociodemografica'},
   {text: 'Test', link: '/Test'},
   {text: 'Resultados', link:'/Resultados'},
   
@@ -47,7 +48,9 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Barra( {children}) {
   const location = useLocation();
-  const [currentTheme, setCurrentTheme] = useState('dark');
+  //Cambiar tema predeterminado light/dark
+  const [currentTheme, setCurrentTheme] = useState('light');
+
   const [testEnable, setTestEnable] = useState(false);
 
   useEffect(() => {
@@ -78,14 +81,14 @@ function Barra( {children}) {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          {/*<img src={PsychologyIcon} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />*/}
+          <Box sx={{ display:{xs: 'none', md:'flex'} }}>
+            <img src={PsychologyIcon} width={80} style={{paddingRight:0}} />
+          </Box>
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="#Element"
             sx={{
-              mr: 2,
+              mr: 0,
               display: { xs: 'none', md: 'flex' },
               fontFamily: 'monospace',
               fontWeight: 700,
@@ -94,7 +97,10 @@ function Barra( {children}) {
               textDecoration: 'none',
             }}
           >
-            WisBrain
+            {
+              BRAND_NAME
+              //Modo grande
+            }
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -138,12 +144,12 @@ function Barra( {children}) {
               }
             </Menu>
           </Box>
-          <img src={PsychologyIcon} width={90} style={{paddingRight:10}} />
+          <Box sx={{ display: {xs:'flex', md:'none'} }}>
+            <img src={PsychologyIcon} width={90} style={{paddingRight:10}} />
+          </Box>
           <Typography
             variant="h5"
             noWrap
-            component="a"
-            href=""
             onClick={() => navigate("/")}
             sx={{
               mr: 2,
@@ -156,29 +162,33 @@ function Barra( {children}) {
               textDecoration: 'none',
             }}
           >
-            WisBrain {/*Nombre del Proyecto*/}
+            {
+              BRAND_NAME
+              //Modo pequeño
+            }
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Grid container justifyContent="center" alignItems="center" sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {//Fullscreen
               pages.map((ele) => {
                 const isActive = ele.link == location.pathname;
                 return (
-                <Button
-                  key={ele.text}
-                  disabled={(ele.link == '/Test' && !testEnable) || (ele.link == '/FichaSociodemografica' && testEnable)}
-                  onClick={() => { handleClickPages(ele.link)}}
-                  sx={{ my: 2, color: 'white', display: 'block', fontWeight:isActive?"bold":"regular", fontSize:isActive?18:'default'}}
-                >
-                  {ele.text}
-                </Button>
+                <Grid item key={ele.text} style={{textAlign: 'center'}}>
+                  <Button
+                    disabled={(ele.link == '/Test' && !testEnable) || (ele.link == '/FichaSociodemografica' && testEnable)}
+                    onClick={() => { handleClickPages(ele.link)}}
+                    sx={{ my: 2, color: 'white', display: 'block', fontWeight:isActive?"bold":"regular", fontSize:isActive?18:'default'}}
+                  >
+                    {ele.text}
+                  </Button>
+                </Grid>
                 )
               })
             }
-          </Box>
+          </Grid>
             
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Cambiar tema " >
-              <IconButton sx={{ my: 2, color: 'white', display: 'block' }} onClick={ (event) => {
+              <IconButton sx={{ my: 2, marginLeft:5, color: 'white', display: 'block' }} onClick={ (event) => {
                 if(currentTheme == 'dark'){
                   setCurrentTheme('light');
                 }else{
