@@ -34,12 +34,36 @@ const centerCols = {
 };
 
 const columns = (handleEdit, handleDelete, handleTest) => [
-  { name: "dni", options: { filter: true } },
-  { name: "nombres", options: { filter: true } },
-  { name: "apellidos", options: { filter: false } },
-  { name: "sexo", options: { filter: true } },
-  { name: "fecha de nacimiento", options: { filter: true } },
-  { name: "fecha de evaluación", options: { filter: true } },
+  {
+    name: "dni",
+    options: { filter: true },
+    label: "DNI"
+  },
+  {
+    name: "nombres",
+    options: { filter: true },
+    label: "NOMBRES"
+  },
+  {
+    name: "apelllidos",
+    options: { filter: false },
+    label: "APELLIDOS"
+  },
+  {
+    name: "sexo",
+    options: { filter: true },
+    label: "SEXO"
+  },
+  {
+    name: "fecha de nacimiento",
+    options: { filter: true },
+    label: "NACIMIENTO"
+  },
+  {
+    name: "fecha evaluación",
+    options: { filter: true },
+    label: "EVALUACIÓN"
+  },
   {
     name: "ACCIÓN",
     options: {
