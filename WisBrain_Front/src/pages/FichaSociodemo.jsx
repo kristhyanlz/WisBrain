@@ -216,7 +216,7 @@ export default function FichaSociodemo () {
             </FormControl>
           </Box>
 
-          <Grid container spacing={2} style={{paddingTop: 20, paddingBottom:20, flex: 1}}>
+          <Grid container spacing={2} style={{paddingTop: 29, paddingBottom:20, flex: 1}}>
             <Grid item xs={9}>
               <FormControl fullWidth >
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
