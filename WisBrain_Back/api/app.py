@@ -105,7 +105,7 @@ def iniciarTest():
     global validador, resultado, escucha_thread
 
     # Inicializar las variables globales
-    arduino = Arduino('/dev/pts/8')
+    arduino = Arduino('COM5')
     validador = Validador(tarjetas)
     # teclado_listener = TecladoListener(validador)
     resultado = []
@@ -253,33 +253,41 @@ def devolverHistorialTestPacientes():
         db = get_db()
         cursor = db.cursor()
 
-        # Obtener todos los historiales
-        cursor.execute("SELECT * FROM historial_test;")
-        historial_tests = cursor.fetchall()
+        # Obtener todos los pacientes
+        cursor.execute("SELECT * FROM paciente;")
+        pacientes = cursor.fetchall()
 
-        # Estructura para almacenar los historiales y sus movimientos
         response_data = []
 
-        for historial in historial_tests:
-            historial_id = historial['id_historial']
+        for paciente in pacientes:
+            paciente_id = paciente[0]
 
-            # Obtener los movimientos para cada historial
-            cursor.execute("SELECT * FROM movimientos WHERE id_historial = ?;", (historial_id,))
-            movimientos = cursor.fetchall()
+            # Obtener el historial para el paciente
+            cursor.execute("SELECT * FROM historial_test WHERE id_historial = ?;", (paciente_id,))
+            historial = cursor.fetchone()
 
-            # Combinar el historial con sus movimientos
-            historial_data = {
-                'historial': historial,
-                'movimientos': movimientos
-            }
-            response_data.append(historial_data)
+            if historial:
+                historial_id = historial[0]
+                print(historial_id)
+
+                # Obtener los movimientos para el historial
+                cursor.execute("SELECT numero_tarjeta, resultado, c.nombre FROM movimiento INNER JOIN categoria c ON categoria_propuesta_id = c.id WHERE id_historial = ?;", (historial_id,))
+                movimientos = cursor.fetchall()
+
+                # Estructura de datos para el paciente con su historial y movimientos
+                paciente_data = {
+                    'paciente': paciente,
+                    'historial': historial,
+                    'movimientos': movimientos
+                }
+                response_data.append(paciente_data)
 
         cursor.close()
+        db.close()
 
         return jsonify(response_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/eliminarHistorialPaciente/<dni_paciente>', methods=['DELETE'])
 @cross_origin()
@@ -426,6 +434,9 @@ def insertarMOVS():
         categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
         id_historial = validador.idPaciente
 
+        categoria_esperada_id = asignar_categoria_numerica(categoria_esperada_id)
+        categoria_propuesta_id = asignar_categoria_numerica(categoria_propuesta_id)
+
         cursor.execute("""
                     INSERT INTO movimiento (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial)
                     VALUES (?, ?, ?, ?, ?);
@@ -434,6 +445,16 @@ def insertarMOVS():
     db.commit()
     cursor.close()
 
+def asignar_categoria_numerica(categoria_textual):
+    # Mapear categorías textuales a números según el requerimiento
+    categorias = {
+        'COLOR': 1,
+        'FORMA': 2,
+        'NÚMERO': 3,
+        'OTRO': 4
+    }
+    # Retornar el número correspondiente o un valor por defecto si no se encuentra
+    return categorias.get(categoria_textual, 4)
 
 def finalizarTest():
     global arduino, escucha_thread, resultado, validador
