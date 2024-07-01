@@ -1,13 +1,14 @@
 import * as React from 'react';
 import {useState, useEffect, useRef} from 'react'
 import { useNavigate } from 'react-router-dom';
-import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from '@mui/material';
+import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton} from '@mui/material';
 import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
 
 
 import ContinuarIcon from '@mui/icons-material/PlayArrow';
+import EditIcon from '@mui/icons-material/Edit';
 
 //const BACK_URL = "http://localhost:5000"
 import BACK_URL from './backURL';
@@ -18,13 +19,13 @@ const styles = {
     fontFamily: 'Roboto',
     textAlign: 'center',
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 0,
   },
   title:{
     textAlign: 'center',
     fontSize: 23,
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 10,
     fontFamily: 'Roboto',
   },
   catEsperadas:{
@@ -61,26 +62,37 @@ export default function Test() {
   
   const [intervalRun, setIntervalRun] = useState(null)
   useEffect(()=> {
-    if (localStorage.getItem('testEnable') == 'false'){
-      navigate('/FichaSociodemografica')
+
+    const killIntervals = () => {
+      for (var i = 1; i < 99999; i++)
+        window.clearInterval(i);
     }
-    else if (intervalRun == null){
-      setInterval( ()=> {
-        fetch(`${BACK_URL}/getUpdate`)
-          .then((res) => res.json())
-          .then(async(movs) => {
-            await console.log(JSON.stringify(movs) )
-            if (movs.length > 0){
-              setMovimientos(movs)
-              if (flagPlayer < movs.length){
-                setFlagPlayer(movs.length)
-                tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
+
+    const interval_init = async () => {
+      if (localStorage.getItem('testEnable') == 'false'){
+        navigate('/FichaSociodemografica')
+      }
+      else{
+        await killIntervals()
+        setInterval( ()=> {
+          fetch(`${BACK_URL}/getUpdate`)
+            .then((res) => res.json())
+            .then(async(movs) => {
+              await console.log(JSON.stringify(movs) )
+              if (movs.length > 0){
+                setMovimientos(movs)
+                if (flagPlayer < movs.length){
+                  setFlagPlayer(movs.length)
+                  tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
+                }
               }
-            }
-          })
-      }, 1000)
-      setIntervalRun(true)
+            })
+        }, 1000)
+        setIntervalRun(true)
+      }
     }
+
+    interval_init()
   }, [])
 
   const siguienteFx = () => {
@@ -115,7 +127,12 @@ export default function Test() {
   return (
     <Container fixed >
       <Box style={styles.fichaTexto}>
-        {`${fichaJSON.nombres} ${fichaJSON.ape_paterno} ${fichaJSON.ape_materno} (${fichaJSON.edad} años)`}
+        {`${fichaJSON.nombres} ${fichaJSON.ape_paterno} ${fichaJSON.ape_materno} (${fichaJSON.edad})`}
+        <Tooltip title="Editar Ficha Sociodemográfica" arrow>
+          <IconButton>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
       <Box style={styles.title}>
         Categoría Esperada
