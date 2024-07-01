@@ -19,6 +19,7 @@ import BACK_URL from './backURL';
 
 const EDAD_MINIMA = 15
 const EDAD_MAXIMA = 21
+const NOM_REGEX = /^(?![' -])[a-zA-ZÀ-ÿ\u00f1\u00d1'’-]*(?<![' -])$/
 
 const styles = {
   form: {
@@ -42,9 +43,9 @@ const styles = {
 
 const FormSchema = Yup.object().shape({
   dni_paciente: Yup.string().matches(/^\d{8}$/, 'Debe ingresar los 8 dígitos del DNI').required('Campo requerido'),
-  nombres: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
-  ape_paterno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
-  ape_materno: Yup.string().matches(/^[a-zA-Z]+[\'\-a-zA-Z ]*$/, 'Solo letras, se admite \' y -').required('Campo requerido'),
+  nombres: Yup.string().matches(NOM_REGEX, 'Revise los espacios o carácteres especiales').required('Campo requerido'),
+  ape_paterno: Yup.string().matches(NOM_REGEX, 'Revise los espacios o carácteres especiales').required('Campo requerido'),
+  ape_materno: Yup.string().matches(NOM_REGEX, 'Revise los espacios o carácteres especiales').required('Campo requerido'),
   sexo: Yup.string().required('Por favor, seleccione una opción'),
   fecha_nacimiento: Yup.date().required('Campo requerido'),
   fecha_evaluacion: Yup.date().required('Campo requerido'),
@@ -71,6 +72,18 @@ export default function FichaSociodemo () {
     onSubmit: async (values)=>{
       console.log(`SUBMIT: \n${JSON.stringify(values)}`)
       toast.info('Enviando información...')
+      
+      let fichaJSON = JSON.stringify({
+        dni_paciente: values.dni_paciente,
+        nombres: values.nombres,
+        ape_paterno: values.ape_paterno,
+        ape_materno: values.ape_materno,
+        sexo: values.sexo,
+        fecha_nacimiento: values.fecha_nacimiento,
+        fecha_evaluacion: values.fecha_evaluacion,
+        edad: edadCalculada
+      })
+
       try {
         const submitForm = await fetch(`${BACK_URL}/insertar_paciente`, {
           method: 'POST',
@@ -78,15 +91,7 @@ export default function FichaSociodemo () {
             Accept: "application/json",
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            dni_paciente: values.dni_paciente,
-            nombres: values.nombres,
-            ape_paterno: values.ape_paterno,
-            ape_materno: values.ape_materno,
-            sexo: values.sexo,
-            fecha_nacimiento: values.fecha_nacimiento,
-            fecha_evaluacion: values.fecha_evaluacion
-          })
+          body: fichaJSON
         })
 
         if (!submitForm.ok) {
@@ -99,7 +104,7 @@ export default function FichaSociodemo () {
         } else {
           const result = await submitForm.json();
           console.log(result);
-          localStorage.setItem('testEnable', 'true')
+          localStorage.setItem('testEnable', fichaJSON)
           toast.success('Información guardada correctamente');
           navigate('/Test')
         }
@@ -113,7 +118,7 @@ export default function FichaSociodemo () {
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
-    if (localStorage.getItem('testEnable') === 'true'){
+    if (localStorage.getItem('testEnable') != 'false'){
       navigate('/Test')
     }
     setEdadCalculada(null)

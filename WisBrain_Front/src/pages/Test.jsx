@@ -13,6 +13,13 @@ import ContinuarIcon from '@mui/icons-material/PlayArrow';
 import BACK_URL from './backURL';
 
 const styles = {
+  fichaTexto:{
+    fontSize: 20,
+    fontFamily: 'Roboto',
+    textAlign: 'center',
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
   title:{
     textAlign: 'center',
     fontSize: 23,
@@ -52,42 +59,31 @@ export default function Test() {
     }
   ])
   
+  const [intervalRun, setIntervalRun] = useState(null)
   useEffect(()=> {
-    if (localStorage.getItem('testEnable') != 'true'){
+    if (localStorage.getItem('testEnable') == 'false'){
       navigate('/FichaSociodemografica')
     }
-    
-    const interval = setInterval( ()=> {
-      fetch(`${BACK_URL}/getUpdate`)
-        .then((res) => res.json())
-        .then(async(movs) => {
-          await console.log(JSON.stringify(movs) )
-          if (movs.length > 0){
-            setMovimientos(movs)
-            if (flagPlayer < movs.length){
-              setFlagPlayer(movs.length)
-              tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
+    else if (intervalRun == null){
+      setInterval( ()=> {
+        fetch(`${BACK_URL}/getUpdate`)
+          .then((res) => res.json())
+          .then(async(movs) => {
+            await console.log(JSON.stringify(movs) )
+            if (movs.length > 0){
+              setMovimientos(movs)
+              if (flagPlayer < movs.length){
+                setFlagPlayer(movs.length)
+                tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
+              }
             }
-          }
-        })
-    }, 1000)
-    
+          })
+      }, 1000)
+      setIntervalRun(true)
+    }
   }, [])
 
-  /*const [flagPlayer, setFlagPlayer] = useState(0)
-  useEffect(()=> {
-    if (movimientos[0].categoria != ""){
-      if (movimientos[movimientos.length - 1].resultado == "CORRECTO"){
-        correctoPlayer.play()
-      }else{
-        incorrectoPlayer.play()
-      }
-    }
-      
-  }, [flagPlayer])
-  */
-
-  const continuarFx = () => {
+  const siguienteFx = () => {
     console.log("CONTINUAR")
     fetch(`${BACK_URL}/resume`);
   }
@@ -95,7 +91,7 @@ export default function Test() {
   const spaceKeyListener = React.useCallback((event) => {
     if (event.key == " "){
       console.log(`Tecla espacio`)
-      continuarFx();
+      siguienteFx();
     }
   }, [])
 
@@ -114,8 +110,13 @@ export default function Test() {
     }
   }, [movimientos]);
 
+  let fichaJSON = JSON.parse(localStorage.getItem('testEnable'))
+
   return (
     <Container fixed >
+      <Box style={styles.fichaTexto}>
+        {`${fichaJSON.nombres} ${fichaJSON.ape_paterno} ${fichaJSON.ape_materno} (${fichaJSON.edad} años)`}
+      </Box>
       <Box style={styles.title}>
         Categoría Esperada
       </Box>
@@ -135,7 +136,7 @@ export default function Test() {
           <Button
             variant='contained'
             endIcon={<ContinuarIcon/>}
-            onClick={continuarFx} 
+            onClick={siguienteFx} 
           >
             Siguiente
           </Button>

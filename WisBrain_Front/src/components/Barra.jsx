@@ -51,10 +51,18 @@ function Barra( {children}) {
   //Cambiar tema predeterminado light/dark
   const [currentTheme, setCurrentTheme] = useState('light');
 
-  const [testEnable, setTestEnable] = useState(false);
+  const [testEnable, setTestEnable] = useState(localStorage.getItem('testEnable'));
+
+    useEffect(() => {
+      console.log(`Test enable: ${testEnable}`)
+    }, [])
 
   useEffect(() => {
-    setTestEnable(localStorage.getItem('testEnable') === 'true')
+    setTestEnable(localStorage.getItem('testEnable'))
+    if (testEnable == null) {
+      localStorage.setItem('testEnable', 'false')
+      setTestEnable('false')
+    }
   }, [location.pathname])
 
   const navigate = useNavigate();
@@ -135,11 +143,16 @@ function Barra( {children}) {
               {//Estrecho, flotante
                 pages.map((ele) => {
                   const isActive = ele.link == location.pathname;
-                  return (
-                    <MenuItem key={ele.text} disabled={ele.link == '/Test' && !testEnable} onClick={() => { handleClickPages(ele.link)}}>
-                      <Typography textAlign="center" fontWeight={isActive?"bold":"regular"} fontSize={isActive?18:"default"}>{ele.text}</Typography>
-                    </MenuItem>
-                  )
+                let habilitar = true
+                if (ele.link == '/Test' && testEnable == 'false')
+                  habilitar = false
+                else if (ele.link == '/FichaSociodemografica' && testEnable != 'false')
+                  habilitar = false
+                return habilitar ? (
+                      <MenuItem key={ele.text} onClick={() => { handleClickPages(ele.link)}}>
+                        <Typography textAlign="center" fontWeight={isActive?"bold":"regular"} fontSize={isActive?18:"default"}>{ele.text}</Typography>
+                      </MenuItem>
+                  ) : null
                 })
               }
             </Menu>
@@ -171,17 +184,21 @@ function Barra( {children}) {
             {//Fullscreen
               pages.map((ele) => {
                 const isActive = ele.link == location.pathname;
-                return (
+                let habilitar = true
+                if (ele.link == '/Test' && testEnable == 'false')
+                  habilitar = false
+                else if (ele.link == '/FichaSociodemografica' && testEnable != 'false')
+                  habilitar = false
+                return habilitar ? (
                 <Grid item key={ele.text} style={{textAlign: 'center'}}>
                   <Button
-                    disabled={(ele.link == '/Test' && !testEnable) || (ele.link == '/FichaSociodemografica' && testEnable)}
                     onClick={() => { handleClickPages(ele.link)}}
                     sx={{ my: 2, color: 'white', display: 'block', fontWeight:isActive?"bold":"regular", fontSize:isActive?18:'default'}}
                   >
                     {ele.text}
                   </Button>
                 </Grid>
-                )
+                ):null
               })
             }
           </Grid>
