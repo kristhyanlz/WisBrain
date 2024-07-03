@@ -79,8 +79,8 @@ export default function FichaSociodemo () {
         ape_materno: values.ape_materno,
         sexo: values.sexo,
         fecha_nacimiento: values.fecha_nacimiento,
-        fecha_evaluacion: values.fecha_evaluacion,
-        edad: edadCalculada
+        edad: edadCalculada,
+        fecha_evaluacion: values.fecha_evaluacion
       })
 
       try {

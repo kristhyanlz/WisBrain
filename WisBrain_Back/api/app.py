@@ -194,7 +194,7 @@ def insertar_paciente():
 
         cursor.execute("""
             INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion)
-            VALUES (?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, validador.fechaEvaluacion))
 
         db.commit()
