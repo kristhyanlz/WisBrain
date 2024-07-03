@@ -344,7 +344,7 @@ def actualizarPaciente():
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
         sexo = data.get('sexo')
-        fecha_nacimiento = data.get('fecha_nacimiento')
+        fecha_nacimiento = data.get('fecha_nacimiento')[:10]
         edad = data.get('edad')
         dni_paciente_antiguo = data.get('dni_paciente_antiguo')
 
