@@ -4,6 +4,8 @@ import FichaSociodemo from "./pages/FichaSociodemo";
 import Resultados from './pages/Resultados'
 import Pacientes from "./pages/Pacientes";
 
+import ModalPaciente from "./components/ModalPaciente";
+
 import Barra from "./components/Barra";
 
 import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
@@ -20,6 +22,7 @@ export default function Main() {
             <Route path="/" element={<Navigate to='/FichaSociodemografica'/> } />
             <Route path='/Test'    element={<Test/>} />
             <Route path='/FichaSociodemografica'    element={<FichaSociodemo/>} />
+            <Route path='/Modal'    element={<ModalPaciente/>} />
             <Route path='/Resultados'    element={<Resultados/>} />
             <Route path='/Pacientes'    element={<Pacientes/>} />
             <Route path="/contacts/:name/:lastname" element={<Contact/>}/>

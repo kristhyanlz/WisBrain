@@ -17,8 +17,6 @@ import { toast } from 'react-toastify';
 //BACK URL
 import BACK_URL from './backURL';
 
-const EDAD_MINIMA = 15
-const EDAD_MAXIMA = 21
 const NOM_REGEX = /^(?![\' \-])[a-zA-ZÀ-ÿ\u00f1\u00d1 \'\-]*(?<![\' \-])$/
 
 const styles = {
@@ -131,9 +129,9 @@ export default function FichaSociodemo () {
 
   return (
     <Container maxWidth='xs' style={styles.form}>
-      <div style={styles.title}>
+      <Box style={styles.title}>
         Información del Paciente
-      </div>
+      </Box>
 
       <Box sx={{
         display: 'flex',
