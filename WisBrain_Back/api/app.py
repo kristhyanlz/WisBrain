@@ -26,6 +26,8 @@ import logging
 #python -m flask --app ./WisBrain_Back/api/app.py run
 #sudo apt-get install -y python3-dev libasound2-dev
 
+ARDUINO_PORT = 'COM5'
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -33,8 +35,6 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 #/log = logging.getLogger('werkzeug')
 #log.setLevel(logging.ERROR)
 
-# Inicializar las variables
-# arduino = Arduino('COM5')
 '''
 validadorEntrada = ValidadorEntradaDB()
 validador = Validador(tarjetas)
@@ -105,7 +105,7 @@ def iniciarTest():
     global validador, resultado, escucha_thread
 
     # Inicializar las variables globales
-    arduino = Arduino('COM5')
+    arduino = Arduino(ARDUINO_PORT)
     validador = Validador(tarjetas)
     # teclado_listener = TecladoListener(validador)
     resultado = []
