@@ -17,27 +17,26 @@ import { toast } from 'react-toastify';
 //BACK URL
 import BACK_URL from './backURL';
 
-const EDAD_MINIMA = 15
-const EDAD_MAXIMA = 21
-const NOM_REGEX = /^(?![' -])[a-zA-ZÀ-ÿ\u00f1\u00d1'’-]*(?<![' -])$/
+const NOM_REGEX = /^(?![\' \-])[a-zA-ZÀ-ÿ\u00f1\u00d1 \'\-]*(?<![\' \-])$/
 
 const styles = {
   form: {
     flex: 1,
     justifyContent: 'flex-start',
-    paddingTop: 30,
+    marginTop: 20,
+    paddingTop: 0,
     paddingHorizontal: 0,
   },
   title:{
     textAlign: 'center',
     fontSize: 32,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 0,
+    paddingBottom: 0,
     fontFamily: 'Candara',
   },
   formEle: {
     paddingHorizontal: 10,
-    paddingTop: 10,
+    paddingTop: 0,
   }
 };
 
@@ -80,8 +79,8 @@ export default function FichaSociodemo () {
         ape_materno: values.ape_materno,
         sexo: values.sexo,
         fecha_nacimiento: values.fecha_nacimiento,
-        fecha_evaluacion: values.fecha_evaluacion,
-        edad: edadCalculada
+        edad: edadCalculada,
+        fecha_evaluacion: values.fecha_evaluacion
       })
 
       try {
@@ -130,9 +129,9 @@ export default function FichaSociodemo () {
 
   return (
     <Container maxWidth='xs' style={styles.form}>
-      <div style={styles.title}>
+      <Box style={styles.title}>
         Información del Paciente
-      </div>
+      </Box>
 
       <Box sx={{
         display: 'flex',
@@ -147,7 +146,7 @@ export default function FichaSociodemo () {
             label="DNI"
             name="dni_paciente"
             autoFocus
-            style={styles.formEle}
+            style={{...styles.formEle, marginTop:10}}
             variant="filled"
             //value={dni_paciente}
             onChange={formik.handleChange}
@@ -169,34 +168,41 @@ export default function FichaSociodemo () {
             error={formik.touched.nombres && Boolean(formik.errors.nombres)}
             helperText={formik.touched.nombres && formik.errors.nombres}
           />
-          <TextField 
-            margin='normal'
-            required
-            fullWidth
-            label="Apellido Paterno"
-            name='ape_paterno'
-            style={styles.formEle}
-            variant="filled"
-            //value={ape_paterno}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.ape_paterno && Boolean(formik.errors.ape_paterno)}
-            helperText={formik.touched.ape_paterno && formik.errors.ape_paterno}
-          />
-          <TextField 
-            margin='normal'
-            required
-            fullWidth
-            label="Apellido Materno"
-            name='ape_materno'
-            style={styles.formEle}
-            variant="filled"
-            //value={ape_materno}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.ape_materno && Boolean(formik.errors.ape_materno)}
-            helperText={formik.touched.ape_materno && formik.errors.ape_materno}
-          />
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField 
+                margin='normal'
+                required
+                fullWidth
+                label="Apellido Paterno"
+                name='ape_paterno'
+                style={styles.formEle}
+                variant="filled"
+                //value={ape_paterno}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.ape_paterno && Boolean(formik.errors.ape_paterno)}
+                helperText={formik.touched.ape_paterno && formik.errors.ape_paterno}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField 
+                margin='normal'
+                required
+                fullWidth
+                label="Apellido Materno"
+                name='ape_materno'
+                style={styles.formEle}
+                variant="filled"
+                //value={ape_materno}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.ape_materno && Boolean(formik.errors.ape_materno)}
+                helperText={formik.touched.ape_materno && formik.errors.ape_materno}
+              />
+            </Grid>
+          </Grid>
 
           <Box fullWidth style={{...styles.formEle, paddingTop: 25}}>
             <FormControl fullWidth >
@@ -221,7 +227,7 @@ export default function FichaSociodemo () {
             </FormControl>
           </Box>
 
-          <Grid container spacing={2} style={{paddingTop: 29, paddingBottom:20, flex: 1}}>
+          <Grid container spacing={2} style={{marginTop: 11, marginBottom:30, flex: 1}}>
             <Grid item xs={9}>
               <FormControl fullWidth >
                 <LocalizationProvider dateAdapter={AdapterDayjs}>

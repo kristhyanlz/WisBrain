@@ -45,7 +45,7 @@ void loop() {
       int actualState = (analogRead(sensorPin[i]) > 512)? 1 : 0;
       if (sensorState[i] != actualState){
         Serial.print(sensorName[i]);
-        Serial.println(actualState);
+        Serial.println(actualState);//A1 B0 ...
 
         sensorState[i] = actualState;
       }

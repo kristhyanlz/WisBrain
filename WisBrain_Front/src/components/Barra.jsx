@@ -90,7 +90,7 @@ function Barra( {children}) {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box sx={{ display:{xs: 'none', md:'flex'} }}>
-            <img src={PsychologyIcon} width={80} style={{paddingRight:0}} />
+            <img src={PsychologyIcon} width={60} style={{paddingRight:0}} />
           </Box>
           <Typography
             variant="h6"
@@ -158,7 +158,7 @@ function Barra( {children}) {
             </Menu>
           </Box>
           <Box sx={{ display: {xs:'flex', md:'none'} }}>
-            <img src={PsychologyIcon} width={90} style={{paddingRight:10}} />
+            <img src={PsychologyIcon} width={70} style={{paddingRight:10}} />
           </Box>
           <Typography
             variant="h5"
