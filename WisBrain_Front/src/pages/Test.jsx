@@ -110,19 +110,23 @@ export default function Test() {
   }
 
   const spaceKeyListener = React.useCallback((event) => {
-    if (event.key == " "){
+    if (event.key == " " && !openModal){
       console.log(`Tecla espacio`)
       siguienteFx();
     }
-  }, [])
+  }, [openModal])
 
   useEffect(() => {
-    document.addEventListener("keydown", spaceKeyListener, false);
+    if (!openModal) {
+      document.addEventListener("keydown", spaceKeyListener, false);
+    } else {
+      document.removeEventListener("keydown", spaceKeyListener, false);
+    }
 
     return () => {
       document.removeEventListener("keydown", spaceKeyListener, false);
     };
-  }, [spaceKeyListener]);
+  }, [openModal, spaceKeyListener]);
 
   useEffect(() => {
     if (tableRef.current) {

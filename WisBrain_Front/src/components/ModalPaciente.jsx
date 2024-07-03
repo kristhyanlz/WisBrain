@@ -83,30 +83,36 @@ export default function ModalPaciente ({open, handleClose}) {
       })
 
       try {
+        
         const submitForm = await fetch(`${BACK_URL}/actualizarPaciente`, {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             Accept: "application/json",
             'Content-Type': 'application/json'
           },
           body: fichaJSON
         })
-
-        if (!submitForm.ok) {
+        console.log(`STATUS: ${submitForm.status}`)
+        if (!submitForm.ok){
           if (submitForm.status === 500) {
             const errorData = await submitForm.json();
             toast.error('No se pudo actualizar los datos del paciente');
           }
-        } else {
+        } else if (submitForm.status === 200){
           const result = await submitForm.json();
           console.log(result);
-          localStorage.setItem('testEnable', fichaJSON)
+          fichaJSON = JSON.parse(fichaJSON)
+          console.log("Entro al 200")
+          fichaJSON.dni_paciente = fichaJSON.dni_paciente_nuevo
+          delete fichaJSON["dni_paciente_nuevo"]
+          delete fichaJSON["dni_paciente_antiguo"]
+          localStorage.setItem('testEnable', JSON.stringify(fichaJSON))
           toast.success('Información guardada correctamente');
         }
-
       } catch (error) {
         toast.error('Falló la conexión con la base de datos')
       }
+      handleClose()
     },
     validationSchema: FormSchema
   })
