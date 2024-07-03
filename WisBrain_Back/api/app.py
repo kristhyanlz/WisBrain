@@ -411,7 +411,7 @@ def insertarTEST(observaciones):
 
     cursor.execute("""
                 INSERT INTO historial_test (id_historial, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
-                                           num_total_errores, procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test)
+                                           num_total_errores, porcentaje_errores_perseverativos, observaciones, fecha_test, resultado_test)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, num_total_errores,
                   procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test))
@@ -459,6 +459,11 @@ def asignar_categoria_numerica(categoria_textual):
     }
     # Retornar el número correspondiente o un valor por defecto si no se encuentra
     return categorias.get(categoria_textual, 4)
+
+def hallarResultadosCognitivosFinales():
+    pass
+
+
 
 def finalizarTest():
     global arduino, escucha_thread, resultado, validador
