@@ -183,18 +183,19 @@ def insertar_paciente():
         cursor = db.cursor()
 
         data = request.get_json()
-        validador.fechaEvaluacion = data.get('fecha_evaluacion')[:10]
         dni_paciente = data.get('dni_paciente')
         nombres = data.get('nombres')
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
-        fecha_nacimiento = data.get('fecha_nacimiento')[:10]
         sexo = data.get('sexo')
+        fecha_nacimiento = data.get('fecha_nacimiento')[:10]
+        edad = data.get('edad')
+        validador.fechaEvaluacion = data.get('fecha_evaluacion')[:10]
 
         cursor.execute("""
-            INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, sexo)
+            INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion)
             VALUES (?, ?, ?, ?, ?, ?);
-        """, (dni_paciente, nombres, ape_paterno, ape_materno, fecha_nacimiento, sexo))
+        """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, validador.fechaEvaluacion))
 
         db.commit()
         cursor.close()
@@ -338,13 +339,14 @@ def devolverDatosPaciente(dni_paciente):
 def actualizarPaciente():
     try:
         data = request.get_json()
-        dni_paciente_antiguo = data.get('dni_paciente_antiguo')
         dni_paciente_nuevo = data.get('dni_paciente_nuevo')
         nombres = data.get('nombres')
         ape_paterno = data.get('ape_paterno')
         ape_materno = data.get('ape_materno')
+        sexo = data.get('sexo')
         fecha_nacimiento = data.get('fecha_nacimiento')
-        genero = data.get('genero')
+        edad = data.get('edad')
+        dni_paciente_antiguo = data.get('dni_paciente_antiguo')
 
         db = get_db()
         cursor = db.cursor()
@@ -355,11 +357,12 @@ def actualizarPaciente():
         # Actualiza el paciente en la tabla paciente
         cursor.execute("""
             UPDATE paciente
-            SET dni_paciente = ?, nombres = ?, ape_paterno = ?, ape_materno = ?, fecha_nacimiento = ?, genero = ?
+            SET dni_paciente = ?, nombres = ?, ape_paterno = ?, ape_materno = ?, sexo = ?, fecha_nacimiento = ?, edad = ?
             WHERE dni_paciente = ?;
-        """, (dni_paciente_nuevo, nombres, ape_paterno, ape_materno, fecha_nacimiento, genero,
+        """, (dni_paciente_nuevo, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad,
               dni_paciente_antiguo))
 
+        '''# Arreglar los UPDATES!!
         # Si el DNI es diferente, actualiza las tablas relacionadas
         if dni_paciente_antiguo != dni_paciente_nuevo:
             # Actualiza el paciente en la tabla historial_test
@@ -375,6 +378,7 @@ def actualizarPaciente():
                 SET id_historial = ?
                 WHERE id_historial = ?;
             """, (dni_paciente_nuevo, dni_paciente_antiguo))
+        '''
 
         # Finaliza la transacción
         db.commit()

@@ -48,6 +48,12 @@ export default function Test() {
   const tableRef = useRef(null);
 
   const [openModal, setOpenModal] = useState(false)
+  const handleOpenModal = () => {
+    setOpenModal(true)
+  }
+  const handleCloseModal = () => {
+    setOpenModal(false)
+  }
 
   const [movimientos, setMovimientos] = useState([
     {
@@ -134,7 +140,7 @@ export default function Test() {
           {`${fichaJSON.nombres} ${fichaJSON.ape_paterno} ${fichaJSON.ape_materno} (${fichaJSON.edad})`}
           <Tooltip title="Editar Ficha Sociodemográfica" arrow>
             <IconButton
-              onClick={() => setOpenModal(true)}
+              onClick={handleOpenModal}
             >
               <EditIcon />
             </IconButton>
@@ -212,15 +218,9 @@ export default function Test() {
           </Grid>
         </Grid>
       </Container>
-      <Modal
-        open = {openModal}
-        onClose = {() => setOpenModal(false)}
-      >
-        {/*<ModalPaciente/>*/}
-        <Box>
-          Hola mundo
-        </Box>
-      </Modal>
+      
+      <ModalPaciente open={openModal} handleClose={handleCloseModal}/>
+        
     </>
   );
 }
