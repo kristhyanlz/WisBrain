@@ -7,10 +7,11 @@ import MUIDataTable from "mui-datatables";
 import { dataPacientes } from "./dataPacientes";
 import { red } from "@mui/material/colors";
 import { movimientos } from "./dataMovimientos";
+import ModalPaciente from "../components/ModalPaciente";
 
 const columns = (handleEdit, handleDelete, handleTest) => [
   {
-    name: "dni",
+    name: "dni_paciente",
     options: { filter: true },
     label: "DNI"
   },
@@ -20,9 +21,14 @@ const columns = (handleEdit, handleDelete, handleTest) => [
     label: "NOMBRES"
   },
   {
-    name: "apellidos",
-    options: { filter: false },
-    label: "APELLIDOS"
+    name: "ape_paterno",
+    options: { filter: true },
+    label: "APELLIDO PATERNO"
+  },
+  {
+    name: "ape_materno",
+    options: { filter: true },
+    label: "APELLIDO MATERNO"
   },
   {
     name: "sexo",
@@ -33,6 +39,11 @@ const columns = (handleEdit, handleDelete, handleTest) => [
     name: "fecha_nacimiento",
     options: { filter: true },
     label: "NACIMIENTO"
+  },
+  {
+    name: "edad",
+    options: { filter: true },
+    label: "EDAD"
   },
   {
     name: "fecha_evaluacion",
@@ -65,11 +76,13 @@ const Pacientes = () => {
   const [modalType, setModalType] = useState("");
   const [currentRow, setCurrentRow] = useState(null);
   const [editValues, setEditValues] = useState({
-    dni: "",
+    dni_paciente: "",
     nombres: "",
-    apellidos: "",
+    ape_paterno: "",
+    ape_materno: "",
     sexo: "",
     fecha_nacimiento: "",
+    edad: null,
     fecha_evaluacion: ""
   });
 
@@ -81,20 +94,10 @@ const Pacientes = () => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        dataFromServer = await response.json();
+        const dataFromServer = await response.json();
+        setData(dataFromServer);
 
-        // Procesar los datos recibidos para ajustarlos al formato deseado
-        const pacientes = dataFromServer.map(paciente => ({
-          dni: paciente.paciente[0],
-          nombres: paciente.paciente[1],
-          apellidos: paciente.paciente[2],
-          sexo: paciente.paciente[3],
-          fecha_nacimiento: paciente.paciente[4],
-          fecha_evaluacion: paciente.paciente[6]
-          
-        }));
-
-        setData(pacientes); // Actualizar el estado con los datos de los pacientes
+        setData(dataFromServer); // Actualizar el estado con los datos de los pacientes
       } catch (error) {
         console.error('Error fetching data:', error);
         // Aquí podrías manejar el error de alguna manera, por ejemplo, mostrando un mensaje al usuario
@@ -113,8 +116,8 @@ const Pacientes = () => {
     e.stopPropagation();
     setCurrentRow(tableMeta.rowData);
     
-    const [dni, nombres, apellidos, sexo, fecha_nacimiento, fecha_evaluacion] = tableMeta.rowData;
-    setEditValues({ dni, nombres, apellidos, sexo, fecha_nacimiento, fecha_evaluacion });
+    const [dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion] = tableMeta.rowData;
+    setEditValues({ dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion });
     setModalType("edit");
     setOpen(true);
   };
@@ -140,11 +143,6 @@ const Pacientes = () => {
     setButtonText(showTest ? "más detalles" : "ocultar detalles"); // Update button text dynamically
   };
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setEditValues({ ...editValues, [name]: value });
-  };
-
   const renderDialog = () => {
     switch (modalType) {
       case "delete":
@@ -161,21 +159,13 @@ const Pacientes = () => {
           </Dialog>
         );
       case "edit":
-        return (
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Editar Paciente</DialogTitle>
-            <DialogContent>
-              <TextField margin="dense" name="dni" label="DNI" type="text" fullWidth value={editValues.dni} onChange={handleInputChange} />
-              <TextField margin="dense" name="nombres" label="Nombres" type="text" fullWidth value={editValues.nombres} onChange={handleInputChange} />
-              <TextField margin="dense" name="apellidos" label="Apellidos" type="text" fullWidth value={editValues.apellidos} onChange={handleInputChange} />
-              <TextField margin="dense" name="sexo" label="Sexo" type="text" fullWidth value={editValues.sexo} onChange={handleInputChange} />
-              <TextField margin="dense" name="fecha_nacimiento" label="Fecha de Nacimiento" type="date" fullWidth value={editValues.fecha_nacimiento} onChange={handleInputChange} InputLabelProps={{ shrink: true }} />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose}>Cancelar</Button>
-              <Button onClick={handleUpdate} color="primary">Actualizar</Button>
-            </DialogActions>
-          </Dialog>
+        return (  
+          <ModalPaciente
+            open={open}
+            onClose={handleClose}
+            dataFicha={editValues}
+            setDataFicha={setEditValues}
+          />
         );
       case "test":
         return (
@@ -210,48 +200,6 @@ const Pacientes = () => {
         );
       default:
         return null;
-    }
-  };
-
-  const handleUpdate = async () => {
-    const [ape_paterno, ape_materno] = editValues.apellidos.split(' ');
-
-    const updatedPatient = {
-      dni_paciente_nuevo: editValues.dni,
-      nombres: editValues.nombres,
-      ape_paterno: ape_paterno,
-      ape_materno: ape_materno,
-      sexo: editValues.sexo,
-      fecha_nacimiento: editValues.fecha_nacimiento,
-      edad: calculateAge(editValues.fecha_nacimiento),
-      dni_paciente_antiguo: currentRow[0]
-    };
-
-    try {
-      const response = await fetch('http://127.0.0.1:5000/actualizarPaciente', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedPatient)
-      });
-
-      if (!response.ok) {
-        throw new Error('Error updating patient');
-      }
-
-      const updatedData = data.map((row) => {
-        if (row.dni === currentRow[0]) {
-          return editValues;
-        }
-        return row;
-      });
-
-      setData(updatedData);
-      location.reload();
-      handleClose();
-    } catch (error) {
-      console.error('Error updating patient:', error);
     }
   };
 
@@ -296,7 +244,7 @@ const Pacientes = () => {
     <Container maxWidth='lg' sx={{ marginTop: 3 }}>
       <MUIDataTable
         title={"LISTA DE PACIENTES"}
-        data={data}
+        data={data.map((row) => row.paciente)}
         columns={columns(handleEdit, handleDelete, handleTest)}
         options={options}
       />
@@ -368,7 +316,7 @@ const Test = ({ showTest, setShowTest, dniCurrent }) => {
 const Resultados = ({ dniCurrent }) => {
 
   const dni = dniCurrent;
-  const patientData = dataFromServer.find(patient => patient.dni === dni);
+  const patientData = data.find(patient => patient.dni === dni);
 
   const patientHistory = patientData.historial;
 
