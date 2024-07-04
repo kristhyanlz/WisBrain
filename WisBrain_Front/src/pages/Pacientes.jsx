@@ -84,20 +84,20 @@ const Pacientes = () => {
     fecha_evaluacion: ""
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:5000/devolverHistorialTestPacientes');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        dataFromServer = await response.json();
-        setData(dataFromServer);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+  const fetchData = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/devolverHistorialTestPacientes');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    };
+      const dataFromServer = await response.json();
+      setData(dataFromServer);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -105,6 +105,11 @@ const Pacientes = () => {
   const [buttonText, setButtonText] = useState("más detalles");
 
   const handleClose = () => setOpen(false);
+
+  const handleCloseModalUpdate = () => {
+    setOpen(false);
+    fetchData();
+  }
 
   const handleEdit = (e, tableMeta) => {
     e.stopPropagation();
@@ -155,7 +160,7 @@ const Pacientes = () => {
         return (  
           <ModalPaciente
             open={open}
-            onClose={handleClose}
+            onClose={handleCloseModalUpdate}
             dataFicha={editValues}
             setDataFicha={setEditValues}
           />
