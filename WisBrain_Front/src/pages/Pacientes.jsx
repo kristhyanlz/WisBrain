@@ -90,7 +90,7 @@ const Pacientes = () => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const dataFromServer = await response.json();
+      dataFromServer = await response.json();
       setData(dataFromServer);
     } catch (error) {
       console.error('Error fetching data:', error);

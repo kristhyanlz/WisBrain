@@ -205,20 +205,24 @@ def insertar_paciente():
     sexo = data.get('sexo')
     fecha_nacimiento = data.get('fecha_nacimiento')[:10]
     edad = data.get('edad')
-    validador.fechaEvaluacion = data.get('fecha_evaluacion')[:10]
+    fecha_evaluacion = data.get('fecha_evaluacion')[:10]
 
     cursor.execute("""
       INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, validador.fechaEvaluacion))
+    """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion))
 
     db.commit()
     cursor.close()
     #ojito
+    validador.edadPaciente = edad
+    validador.fechaEvaluacion = fecha_evaluacion
+    validador.idPaciente = dni_paciente
 
     return jsonify({'message': 'Paciente insertado correctamente'}), 200
   except Exception as e:
-    finalizarTest()
+
+    #finalizarTest()
     print(f"Error al insertar paciente: {e}")
     return jsonify({'error': str(e)}), 500
 

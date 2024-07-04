@@ -14,6 +14,8 @@ const rows = [
   {calificacion: 'Número de errores NO perseverativos', puntaje: 25},
   {calificacion: 'Número total de errores', puntaje: 40},
   {calificacion: 'Porcentaje de errores perseverativos', puntaje: '30%'},
+  {calificacion: 'Rendimiento cognitivo', puntaje: 'Bajo'},
+  {calificacion: 'Flexibilidad cognitiva', puntaje: 'Promedio'},
 ];
 
 const styles = {
