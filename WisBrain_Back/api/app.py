@@ -356,6 +356,15 @@ def actualizarPaciente():
         # Inicia la transacción
         cursor.execute("BEGIN TRANSACTION;")
 
+        if dni_paciente_antiguo != dni_paciente_nuevo:
+            # Actualiza el paciente en la tabla historial_test
+            cursor.execute("""
+                UPDATE historial_test
+                SET dni_paciente = ?
+                WHERE dni_paciente = ?;
+            """, (None, dni_paciente_antiguo))
+
+
         # Actualiza el paciente en la tabla paciente
         cursor.execute("""
             UPDATE paciente
@@ -364,24 +373,15 @@ def actualizarPaciente():
         """, (dni_paciente_nuevo, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad,
               dni_paciente_antiguo))
 
-        '''# Arreglar los UPDATES!!
+        # Arreglar los UPDATES!!
         # Si el DNI es diferente, actualiza las tablas relacionadas
         if dni_paciente_antiguo != dni_paciente_nuevo:
             # Actualiza el paciente en la tabla historial_test
             cursor.execute("""
                 UPDATE historial_test
-                SET id_historial = ?
-                WHERE id_historial = ?;
-            """, (dni_paciente_nuevo, dni_paciente_antiguo))
-
-            # Actualiza el paciente en la tabla movimiento
-            cursor.execute("""
-                UPDATE movimiento
-                SET id_historial = ?
-                WHERE id_historial = ?;
-            """, (dni_paciente_nuevo, dni_paciente_antiguo))
-        '''
-
+                SET dni_paciente = ?
+                WHERE dni_paciente IS NULL;
+            """, (dni_paciente_nuevo,))
         # Finaliza la transacción
         db.commit()
         cursor.close()
