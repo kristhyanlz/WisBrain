@@ -119,8 +119,6 @@ export default function ModalPaciente ({open, handleClose}) {
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
-    if (localStorage.getItem('testEnable') != 'false'){
-    }
     setEdadCalculada(dayjs().diff(dayjs(fichaLocalStorage.fecha_nacimiento), 'year'))
   }, [])
   
