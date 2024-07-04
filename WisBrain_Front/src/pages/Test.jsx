@@ -223,7 +223,12 @@ export default function Test() {
         </Grid>
       </Container>
       
-      <ModalPaciente open={openModal} handleClose={handleCloseModal}/>
+      <ModalPaciente 
+        open={openModal} 
+        onClose={handleCloseModal} 
+        dataFicha={JSON.parse(localStorage.getItem('testEnable'))}
+        setDataFicha={(data) => localStorage.setItem('testEnable', JSON.stringify(data))}
+      />
         
     </>
   );
