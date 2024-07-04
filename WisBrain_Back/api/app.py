@@ -1,7 +1,7 @@
 import sqlite3
 import threading
 
-from flask import Flask, jsonify, request, g
+from flask import Flask, jsonify, request, g, send_file
 from flask_cors import CORS, cross_origin
 from threading import Thread
 import simpleaudio as sa
@@ -17,6 +17,7 @@ from WisBrain_Back.service.Validador import Validador
 from WisBrain_Back.service.Tarjetas import Tarjetas
 from WisBrain_Back.bd.ValidadorEntradaDB import ValidadorEntradaDB
 from WisBrain_Back.service.Util import obtenerFechaActual
+from WisBrain_Back.service.pdf import generate_pdf
 
 from WisBrain_Back.service.TecladoListener import TecladoListener
 
@@ -152,6 +153,18 @@ def resume():
 
     return jsonify({"mensaje": "se renaudo la deteccion"})
 
+
+@app.route('/descargar_pdf', methods=['GET'])
+def descargar_pdf():
+    # Generar el PDF utilizando la función separada
+    pdf_buffer = generate_pdf()
+
+    # Devolver el PDF como una descarga
+    return send_file(pdf_buffer, as_attachment=True, download_name='ejemplo.pdf', mimetype='application/pdf')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/devolver_resumen', methods=['GET'])
 @cross_origin()
