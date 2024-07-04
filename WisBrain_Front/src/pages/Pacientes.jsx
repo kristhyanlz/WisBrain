@@ -81,6 +81,8 @@ const columns = (handleEdit, handleDelete, handleTest) => [
   },
 ];
 
+let dataFromServer
+
 const Pacientes = () => {
   const [data, setData] = useState([]); // Inicializamos con un array vacío
   const [open, setOpen] = useState(false);
@@ -95,6 +97,7 @@ const Pacientes = () => {
     fecha_evaluacion: ""
   });
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -102,7 +105,7 @@ const Pacientes = () => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const dataFromServer = await response.json();
+        dataFromServer = await response.json();
 
         // Procesar los datos recibidos para ajustarlos al formato deseado
         const pacientes = dataFromServer.map(paciente => ({
@@ -133,8 +136,8 @@ const Pacientes = () => {
   const handleEdit = (e, tableMeta) => {
     e.stopPropagation();
     setCurrentRow(tableMeta.rowData);
-    const [dni, nombres, apellidos, sexo, fechaNacimiento, fechaEvaluacion] = tableMeta.rowData;
-    setEditValues({ dni, nombres, apellidos, sexo, "fecha de nacimiento": fechaNacimiento });
+    const [dni, nombres, apellidos, sexo, fecha_nacimiento] = tableMeta.rowData;
+    setEditValues({ dni, nombres, apellidos, sexo, fecha_nacimiento });
     setModalType("edit");
     setOpen(true);
   };
@@ -189,7 +192,7 @@ const Pacientes = () => {
               <TextField margin="dense" name="nombres" label="Nombres" type="text" fullWidth value={editValues.nombres} onChange={handleInputChange} />
               <TextField margin="dense" name="apellidos" label="Apellidos" type="text" fullWidth value={editValues.apellidos} onChange={handleInputChange} />
               <TextField margin="dense" name="sexo" label="Sexo" type="text" fullWidth value={editValues.sexo} onChange={handleInputChange} />
-              <TextField margin="dense" name="fecha de nacimiento" label="Fecha de Nacimiento" type="date" fullWidth value={editValues["fecha de nacimiento"]} onChange={handleInputChange} InputLabelProps={{ shrink: true }} />
+              <TextField margin="dense" name="fecha_nacimiento" label="Fecha de Nacimiento" type="date" fullWidth value={editValues.fecha_nacimiento} onChange={handleInputChange} InputLabelProps={{ shrink: true }} />
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose}>Cancelar</Button>
@@ -217,10 +220,10 @@ const Pacientes = () => {
                 </Grid>
               </Grid>
               <Box mt={3}>
-                <Resultados/>
+                <Resultados dniCurrent={currentRow[0]}/>
               </Box>
               <Box mt={2}>
-                <Test showTest={showTest} setShowTest={setShowTest} />
+              <Test showTest={showTest} setShowTest={setShowTest} dniCurrent={currentRow[0]} />
               </Box>
             </DialogContent>
             <DialogActions>
@@ -290,8 +293,11 @@ const Pacientes = () => {
   );
 };
 
-const Test = ({ showTest, setShowTest }) => {
-  const randomMovements = movimientos;
+const Test = ({ showTest, setShowTest, dniCurrent }) => {
+
+  const dni = dniCurrent
+  const patientData = dataFromServer.find(patient => patient.dni === dni);
+  const randomMovements = patientData.movimientos;
 
   const toggleTest = () => {
     setShowTest(!showTest);
@@ -322,12 +328,12 @@ const Test = ({ showTest, setShowTest }) => {
               </TableHead>
               <TableBody>
                 {randomMovements.map((row) => (
-                  <TableRow hover key={row.id}>
-                    <TableCell align="center">{row.id}</TableCell>
-                    <TableCell align="center" sx={row.resultado === "INCORRECTO" ? { color: red[500] } : {}}>
-                      {row.resultado}
+                  <TableRow hover key={row[0]}>
+                    <TableCell align="center">{row[0]}</TableCell>
+                    <TableCell align="center" sx={row[1] === "INCORRECTO" ? { color: red[500] } : {}}>
+                      {row[1]}
                     </TableCell>
-                    <TableCell align="center">{row.categoria}</TableCell>
+                    <TableCell align="center">{row[2]}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -347,13 +353,21 @@ const Test = ({ showTest, setShowTest }) => {
 };
 
 
-const Resultados = () => {
+const Resultados = ({ dniCurrent }) => {
+
+  const dni = dniCurrent;
+  const patientData = dataFromServer.find(patient => patient.dni === dni);
+
+  const patientHistory = patientData.historial;
+
   const rows = [
-    { calificacion: 'Número de categorías correctas', puntaje: 10 },
-    { calificacion: 'Número de errores perseverativos', puntaje: 20 },
-    { calificacion: 'Número de errores NO perseverativos', puntaje: 25 },
-    { calificacion: 'Número total de errores', puntaje: 40 },
-    { calificacion: 'Porcentaje de errores de perseverativos', puntaje: '30%' },
+    { calificacion: 'Número de categorías correctas', puntaje: patientHistory[2] },
+    { calificacion: 'Número de errores perseverativos', puntaje: patientHistory[3] },
+    { calificacion: 'Número de errores NO perseverativos', puntaje: patientHistory[4] },
+    { calificacion: 'Número total de errores', puntaje: patientHistory[5] },
+    { calificacion: 'Porcentaje de errores de perseverativos', puntaje: patientHistory[6] +'%' },
+    { calificacion: 'Rendimiento cognitivo', puntaje: patientHistory[8] },
+    { calificacion: 'Flexibilidad cognitiva', puntaje: patientHistory[9] },
   ];
 
   const styles = {
@@ -400,7 +414,7 @@ const Resultados = () => {
           rows={5}
           variant="filled"
           fullWidth
-          value={`Durante el WCST, el paciente mostró habilidades iniciales para identificar patrones, aunque encontró desafíos al adaptarse a nuevas reglas. A medida que avanzaba la prueba, demostró una progresiva flexibilidad al ajustar sus estrategias según la retroalimentación proporcionada.`}
+          value={patientHistory[7]}
         />
       </Box>
       <Grid container style={styles.button} justifyContent="center">

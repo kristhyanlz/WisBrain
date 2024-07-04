@@ -278,6 +278,7 @@ def devolverHistorialTestPacientes():
                 print(movimientos)
                 # Estructura de datos para el paciente con su historial y movimientos
                 paciente_data = {
+                    'dni': paciente[0],
                     'paciente': paciente,
                     'historial': historial,
                     'movimientos': movimientos
