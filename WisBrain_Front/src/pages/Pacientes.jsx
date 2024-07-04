@@ -136,8 +136,9 @@ const Pacientes = () => {
   const handleEdit = (e, tableMeta) => {
     e.stopPropagation();
     setCurrentRow(tableMeta.rowData);
-    const [dni, nombres, apellidos, sexo, fecha_nacimiento] = tableMeta.rowData;
-    setEditValues({ dni, nombres, apellidos, sexo, fecha_nacimiento });
+    
+    const [dni, nombres, apellidos, sexo, fecha_nacimiento, fecha_evaluacion] = tableMeta.rowData;
+    setEditValues({ dni, nombres, apellidos, sexo, fecha_nacimiento, fecha_evaluacion });
     setModalType("edit");
     setOpen(true);
   };
@@ -188,7 +189,7 @@ const Pacientes = () => {
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>Editar Paciente</DialogTitle>
             <DialogContent>
-              <TextField disabled margin="dense" name="dni" label="DNI" type="text" fullWidth value={editValues.dni} onChange={handleInputChange} />
+              <TextField margin="dense" name="dni" label="DNI" type="text" fullWidth value={editValues.dni} onChange={handleInputChange} />
               <TextField margin="dense" name="nombres" label="Nombres" type="text" fullWidth value={editValues.nombres} onChange={handleInputChange} />
               <TextField margin="dense" name="apellidos" label="Apellidos" type="text" fullWidth value={editValues.apellidos} onChange={handleInputChange} />
               <TextField margin="dense" name="sexo" label="Sexo" type="text" fullWidth value={editValues.sexo} onChange={handleInputChange} />
@@ -236,22 +237,57 @@ const Pacientes = () => {
     }
   };
 
-  const handleUpdate = () => {
-    const updatedData = data.map((row) => {
-      if (row === currentRow) {
-        return [
-          editValues.dni,
-          editValues.nombres,
-          editValues.apellidos,
-          editValues.sexo,
-          editValues["fecha de nacimiento"],
-          row[5], // Aquí debes ajustar según la estructura real de tus datos
-        ];
+  const handleUpdate = async () => {
+    const [ape_paterno, ape_materno] = editValues.apellidos.split(' ');
+
+    const updatedPatient = {
+      dni_paciente_nuevo: editValues.dni,
+      nombres: editValues.nombres,
+      ape_paterno: ape_paterno,
+      ape_materno: ape_materno,
+      sexo: editValues.sexo,
+      fecha_nacimiento: editValues.fecha_nacimiento,
+      edad: calculateAge(editValues.fecha_nacimiento),
+      dni_paciente_antiguo: currentRow[0]
+    };
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/actualizarPaciente', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedPatient)
+      });
+
+      if (!response.ok) {
+        throw new Error('Error updating patient');
       }
-      return row;
-    });
-    setData(updatedData);
-    handleClose();
+
+      const updatedData = data.map((row) => {
+        if (row.dni === currentRow[0]) {
+          return editValues;
+        }
+        return row;
+      });
+
+      setData(updatedData);
+      location.reload();
+      handleClose();
+    } catch (error) {
+      console.error('Error updating patient:', error);
+    }
+  };
+
+  const calculateAge = (birthdate) => {
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const options = {
