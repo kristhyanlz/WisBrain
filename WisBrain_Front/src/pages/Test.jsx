@@ -1,13 +1,14 @@
 import * as React from 'react';
 import {useState, useEffect, useRef} from 'react'
 import { useNavigate } from 'react-router-dom';
-import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal} from '@mui/material';
+import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal, Fab} from '@mui/material';
 import { red } from '@mui/material/colors';
 
 //import {movimientos} from './dataMovimientos'
 
 
 import ContinuarIcon from '@mui/icons-material/PlayArrow';
+import LogoutIcon from '@mui/icons-material/Logout';
 import EditIcon from '@mui/icons-material/Edit';
 
 //const BACK_URL = "http://localhost:5000"
@@ -221,6 +222,9 @@ export default function Test() {
             </TableContainer>
           </Grid>
         </Grid>
+        <Fab color="error">
+          <LogoutIcon />
+        </Fab>
       </Container>
       
       <ModalPaciente 
@@ -229,7 +233,6 @@ export default function Test() {
         dataFicha={JSON.parse(localStorage.getItem('testEnable'))}
         setDataFicha={(data) => localStorage.setItem('testEnable', JSON.stringify(data))}
       />
-        
     </>
   );
 }
