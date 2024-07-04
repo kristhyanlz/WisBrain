@@ -26,7 +26,7 @@ import logging
 #python -m flask --app ./WisBrain_Back/api/app.py run
 #sudo apt-get install -y python3-dev libasound2-dev
 
-ARDUINO_PORT = 'COM5'
+ARDUINO_PORT = '/dev/pts/7'
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -51,34 +51,34 @@ audioSiguiente = sa.WaveObject.from_wave_file("WisBrain_Back/assets/siguiente.wa
 
 
 def reproducir_audio():
-    play_obj = audioSiguiente.play()
-    play_obj.wait_done()
+  play_obj = audioSiguiente.play()
+  play_obj.wait_done()
 
 
 app.config['DATABASE'] = 'WisBrain_Back/bd/database_wb.db'
 
 
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(app.config['DATABASE'])
-        db.execute("PRAGMA foreign_keys = ON;")
-    return db
+  db = getattr(g, '_database', None)
+  if db is None:
+    db = g._database = sqlite3.connect(app.config['DATABASE'])
+    db.execute("PRAGMA foreign_keys = ON;")
+  return db
 
 
 @app.teardown_appcontext
 def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+  db = getattr(g, '_database', None)
+  if db is not None:
+    db.close()
 
 
 # Método para iniciar el escucha de datos del Arduino
 def iniciar_escucha():
-    global arduino
-    #global teclado_listener
-    arduino.recibir_datos_continuamente(validador)
-    #teclado_listener.escuchar_teclado()
+  global arduino
+  #global teclado_listener
+  arduino.recibir_datos_continuamente(validador)
+  #teclado_listener.escuchar_teclado()
 
 
 # Iniciar el escucha en un hilo separado
@@ -89,7 +89,7 @@ def iniciar_escucha():
 @app.route('/', methods=['GET'])
 @cross_origin()
 def hello_world():
-    return 'Hello Wis!'
+  return 'Hello Wis!'
 
 
 @app.route('/iniciar_test', methods=['GET'])
@@ -99,21 +99,21 @@ def iniciar_test():
 
 
 def iniciarTest():
-    # global teclado_listener
-    global arduino
-    global validador, resultado, escucha_thread
+  # global teclado_listener
+  global arduino
+  global validador, resultado, escucha_thread
 
-    # Inicializar las variables globales
-    arduino = Arduino(ARDUINO_PORT)
-    validador = Validador(tarjetas)
-    # teclado_listener = TecladoListener(validador)
-    resultado = []
+  # Inicializar las variables globales
+  arduino = Arduino(ARDUINO_PORT)
+  validador = Validador(tarjetas)
+  # teclado_listener = TecladoListener(validador)
+  resultado = []
 
-    # Iniciar el hilo de escucha
-    escucha_thread = Thread(target=iniciar_escucha)
-    escucha_thread.start()
+  # Iniciar el hilo de escucha
+  escucha_thread = Thread(target=iniciar_escucha)
+  escucha_thread.start()
 
-    return jsonify({"status": "Test iniciado"}), 200
+  return jsonify({"status": "Test iniciado"}), 200
 
 
 # Endpoint para terminar el test
@@ -126,31 +126,31 @@ def finalizar_test():
 @app.route('/getUpdate', methods=['GET'])
 @cross_origin()
 def get_update():
-    global arduino, resultado
-    #global resultado, teclado_listener, validador
+  global arduino, resultado
+  #global resultado, teclado_listener, validador
 
-    resultado = arduino.resultados_validacion
-    #resultado = teclado_listener.resultados_validacion
-    return jsonify(resultado)
+  resultado = arduino.resultados_validacion
+  #resultado = teclado_listener.resultados_validacion
+  return jsonify(resultado)
 
 
 # Podria ser a al revez.
 @app.route('/resume', methods=['GET'])
 @cross_origin()
 def resume():
-    global arduino, resultado
-    #global teclado_listener, resultado
-    if len(resultado) == 48:
-        finalizarTest()
-        return jsonify({"mensaje: se termino el TEST"})
+  global arduino, resultado
+  #global teclado_listener, resultado
+  if len(resultado) == 48:
+    finalizarTest()
+    return jsonify({"mensaje: se termino el TEST"})
 
-    thread = threading.Thread(target=reproducir_audio)
-    thread.start()
+  thread = threading.Thread(target=reproducir_audio)
+  thread.start()
 
-    arduino.lock = False
-    #teclado_listener.lock = True
+  arduino.lock = False
+  #teclado_listener.lock = True
 
-    return jsonify({"mensaje": "se renaudo la deteccion"})
+  return jsonify({"mensaje": "se renaudo la deteccion"})
 
 
 @app.route('/devolver_resumen', methods=['GET'])
@@ -171,50 +171,50 @@ def devolver_resumen():
 
         return jsonify(result), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+      return jsonify({'error': str(e)}), 500
 
 
 @app.route('/insertar_paciente', methods=['POST'])
 @cross_origin()  ##ojito
 def insertar_paciente():
-    try:
+  try:
 
-        iniciarTest()
+    iniciarTest()
 
-        db = get_db()
-        cursor = db.cursor()
+    db = get_db()
+    cursor = db.cursor()
 
-        data = request.get_json()
-        dni_paciente = data.get('dni_paciente')
-        nombres = data.get('nombres')
-        ape_paterno = data.get('ape_paterno')
-        ape_materno = data.get('ape_materno')
-        sexo = data.get('sexo')
-        fecha_nacimiento = data.get('fecha_nacimiento')[:10]
-        edad = data.get('edad')
-        validador.fechaEvaluacion = data.get('fecha_evaluacion')[:10]
+    data = request.get_json()
+    dni_paciente = data.get('dni_paciente')
+    nombres = data.get('nombres')
+    ape_paterno = data.get('ape_paterno')
+    ape_materno = data.get('ape_materno')
+    sexo = data.get('sexo')
+    fecha_nacimiento = data.get('fecha_nacimiento')[:10]
+    edad = data.get('edad')
+    validador.fechaEvaluacion = data.get('fecha_evaluacion')[:10]
 
-        cursor.execute("""
-            INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, validador.fechaEvaluacion))
+    cursor.execute("""
+      INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, validador.fechaEvaluacion))
 
-        db.commit()
-        cursor.close()
-        #ojito
+    db.commit()
+    cursor.close()
+    #ojito
 
-        return jsonify({'message': 'Paciente insertado correctamente'}), 200
-    except Exception as e:
-        finalizarTest()
-        print(f"Error al insertar paciente: {e}")
-        return jsonify({'error': str(e)}), 500
+    return jsonify({'message': 'Paciente insertado correctamente'}), 200
+  except Exception as e:
+    finalizarTest()
+    print(f"Error al insertar paciente: {e}")
+    return jsonify({'error': str(e)}), 500
 
 
 @app.route('/obtenerFechaActual', methods=['GET'])
 @cross_origin()
 def obtenerFechaActual():
-    result = obtenerFechaActual()
-    return jsonify({'fechaActual': result})
+  result = obtenerFechaActual()
+  return jsonify({'fechaActual': result})
 
 
 @app.route('/insertarObservaciones', methods=['POST'])
@@ -246,172 +246,174 @@ def insertarObservaciones():
 @app.route('/devolverResultadosHistorialPaciente/<dni_paciente>', methods=['GET'])
 @cross_origin()
 def devolverResultadosHistorialPaciente(dni_paciente):
-    try:
-        db = get_db()
-        cursor = db.cursor()
+  try:
+    db = get_db()
+    cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
-        historial_tests = cursor.fetchall()
+    cursor.execute("SELECT * FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
+    historial_tests = cursor.fetchall()
 
-        cursor.close()
+    cursor.close()
 
-        return jsonify(historial_tests), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return jsonify(historial_tests), 200
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
 @app.route('/devolverHistorialTestPacientes', methods=['GET'])
 @cross_origin()
 def devolverHistorialTestPacientes():
-    try:
-        db = get_db()
-        cursor = db.cursor()
+  try:
+    db = get_db()
+    db.row_factory = sqlite3.Row
+    cursor = db.cursor()
 
-        # Obtener todos los pacientes
-        cursor.execute(
-            "SELECT dni_paciente, nombres, ape_paterno || ' ' || ape_materno as apellido_completo, sexo, fecha_nacimiento, edad, fecha_evaluacion FROM paciente;")
-        pacientes = cursor.fetchall()
-        response_data = []
+    # Obtener todos los pacientes
+    cursor.execute("SELECT dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion FROM paciente;")
+    pacientes = [dict(row) for row in cursor.fetchall()] ########
+    response_data = []
 
-        for paciente in pacientes:
-            paciente_id = paciente[0]
+    for paciente in pacientes:
+      paciente_id = paciente["dni_paciente"]
 
-            # Obtener el historial para el paciente
-            cursor.execute("SELECT * FROM historial_test WHERE dni_paciente = ?;", (paciente_id,))
-            historial = cursor.fetchone()
-            print(historial)
-            if historial:
-                historial_id = historial[0]
-                print(historial_id)
+      # Obtener el historial para el paciente
+      cursor.execute("SELECT * FROM historial_test WHERE dni_paciente = ?;", (paciente_id,))
+      historial_ = cursor.fetchone()
+      historial = dict(historial_) if historial_ else False ########
 
-                # Obtener los movimientos para el historial
-                cursor.execute("""
-                    SELECT numero_tarjeta, resultado, c.nombre 
-                    FROM movimiento 
-                    INNER JOIN categoria c ON movimiento.categoria_propuesta_id = c.id 
-                    WHERE movimiento.id_historial = ? 
-                    ORDER BY CAST(numero_tarjeta AS INTEGER) ASC;
-                """, (historial_id,))
-                movimientos = cursor.fetchall()
-                print(movimientos)
-                # Estructura de datos para el paciente con su historial y movimientos
-                paciente_data = {
-                    'dni': paciente[0],
-                    'paciente': paciente,
-                    'historial': historial,
-                    'movimientos': movimientos
-                }
-                response_data.append(paciente_data)
+      if historial:
+        historial_id = historial["id_historial"]
 
-        cursor.close()
-        db.close()
+        # Obtener los movimientos para el historial
+        cursor.execute("""
+          SELECT numero_tarjeta, resultado, c.nombre 
+          FROM movimiento 
+          INNER JOIN categoria c ON movimiento.categoria_propuesta_id = c.id 
+          WHERE movimiento.id_historial = ? 
+          ORDER BY CAST(numero_tarjeta AS INTEGER) ASC;
+        """, (historial_id,))
+        movs = cursor.fetchall()
+        print(f"Paciente: {paciente_id} - {movs and True}")
+        movimientos = [ dict(row) for row in movs ] if movs else [] ########
 
-        return jsonify(response_data), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Estructura de datos para el paciente con su historial y movimientos
+        paciente_data = {
+          'paciente': paciente,
+          'historial': historial,
+          'movimientos': movimientos
+        }
+        response_data.append(paciente_data)
+
+    cursor.close()
+    db.close()
+
+    return jsonify(response_data), 200
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
 @app.route('/eliminarHistorialPaciente/<dni_paciente>', methods=['DELETE'])
 @cross_origin()
 def eliminarHistorialPaciente(dni_paciente):
-    try:
-        db = get_db()
-        cursor = db.cursor()
+  try:
+    db = get_db()
+    cursor = db.cursor()
 
-        # Eliminar movimientos asociados al paciente
-        cursor.execute("DELETE FROM movimiento WHERE id_historial = ?;", (dni_paciente,))
+    # Eliminar movimientos asociados al paciente
+    cursor.execute("DELETE FROM movimiento WHERE id_historial = ?;", (dni_paciente,))
 
-        # Eliminar historial del paciente
-        cursor.execute("DELETE FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
+    # Eliminar historial del paciente
+    cursor.execute("DELETE FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
 
-        # Eliminar al paciente
-        cursor.execute("DELETE FROM paciente WHERE dni_paciente = ?;", (dni_paciente,))
+    # Eliminar al paciente
+    cursor.execute("DELETE FROM paciente WHERE dni_paciente = ?;", (dni_paciente,))
 
-        db.commit()
-        cursor.close()
+    db.commit()
+    cursor.close()
 
-        return jsonify({'message': 'Historial del paciente eliminado correctamente'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return jsonify({'message': 'Historial del paciente eliminado correctamente'}), 200
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
 @app.route('/devolverDatosPaciente/<dni_paciente>', methods=['GET'])
 @cross_origin()
 def devolverDatosPaciente(dni_paciente):
-    try:
-        db = get_db()
-        cursor = db.cursor()
+  try:
+    db = get_db()
+    cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM paciente WHERE dni_paciente = ?;", (dni_paciente,))
-        datos_paciente = cursor.fetchone()
+    cursor.execute("SELECT * FROM paciente WHERE dni_paciente = ?;", (dni_paciente,))
+    datos_paciente = cursor.fetchone()
 
-        cursor.close()
+    cursor.close()
 
-        if datos_paciente:
-            return jsonify(datos_paciente), 200
-        else:
-            return jsonify({'error': 'Paciente no encontrado'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    if datos_paciente:
+      return jsonify(datos_paciente), 200
+    else:
+      return jsonify({'error': 'Paciente no encontrado'}), 404
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
 @app.route('/actualizarPaciente', methods=['PUT'])
 @cross_origin()
 def actualizarPaciente():
-    try:
-        data = request.get_json()
-        dni_paciente_nuevo = data.get('dni_paciente_nuevo')
-        nombres = data.get('nombres')
-        ape_paterno = data.get('ape_paterno')
-        ape_materno = data.get('ape_materno')
-        sexo = data.get('sexo')
-        fecha_nacimiento = data.get('fecha_nacimiento')[:10]
-        edad = data.get('edad')
-        dni_paciente_antiguo = data.get('dni_paciente_antiguo')
+  try:
+    data = request.get_json()
+    dni_paciente_nuevo = data.get('dni_paciente_nuevo')
+    nombres = data.get('nombres')
+    ape_paterno = data.get('ape_paterno')
+    ape_materno = data.get('ape_materno')
+    sexo = data.get('sexo')
+    fecha_nacimiento = data.get('fecha_nacimiento')[:10]
+    edad = data.get('edad')
+    dni_paciente_antiguo = data.get('dni_paciente_antiguo')
 
-        db = get_db()
-        cursor = db.cursor()
+    db = get_db()
+    cursor = db.cursor()
 
-        # Inicia la transacción
-        cursor.execute("BEGIN TRANSACTION;")
+    # Inicia la transacción
+    cursor.execute("BEGIN TRANSACTION;")
 
-        if dni_paciente_antiguo != dni_paciente_nuevo:
-            # Actualiza el paciente en la tabla historial_test
-            cursor.execute("""
-                UPDATE historial_test
-                SET dni_paciente = ?
-                WHERE dni_paciente = ?;
-            """, (None, dni_paciente_antiguo))
+    if dni_paciente_antiguo != dni_paciente_nuevo:
+      # Actualiza el paciente en la tabla historial_test
+      cursor.execute("""
+        UPDATE historial_test
+        SET dni_paciente = ?
+        WHERE dni_paciente = ?;
+      """, (None, dni_paciente_antiguo))
 
-        # Actualiza el paciente en la tabla paciente
-        cursor.execute("""
-            UPDATE paciente
-            SET dni_paciente = ?, nombres = ?, ape_paterno = ?, ape_materno = ?, sexo = ?, fecha_nacimiento = ?, edad = ?
-            WHERE dni_paciente = ?;
-        """, (dni_paciente_nuevo, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad,
-              dni_paciente_antiguo))
 
-        # Arreglar los UPDATES!!
-        # Si el DNI es diferente, actualiza las tablas relacionadas
-        if dni_paciente_antiguo != dni_paciente_nuevo:
-            # Actualiza el paciente en la tabla historial_test
-            cursor.execute("""
-                UPDATE historial_test
-                SET dni_paciente = ?
-                WHERE dni_paciente IS NULL;
-            """, (dni_paciente_nuevo,))
-        # Finaliza la transacción
-        db.commit()
-        cursor.close()
+    # Actualiza el paciente en la tabla paciente
+    cursor.execute("""
+      UPDATE paciente
+      SET dni_paciente = ?, nombres = ?, ape_paterno = ?, ape_materno = ?, sexo = ?, fecha_nacimiento = ?, edad = ?
+      WHERE dni_paciente = ?;
+    """, (dni_paciente_nuevo, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad,
+        dni_paciente_antiguo))
 
-        return jsonify({'message': 'Paciente actualizado correctamente'}), 200
-    except Exception as e:
-        print(f"Error al actualizar paciente: {e}")
-        # Revierte la transacción en caso de error
-        db.rollback()
-        return jsonify({'error': str(e)}), 500
-    finally:
-        cursor.close()
+    # Arreglar los UPDATES!!
+    # Si el DNI es diferente, actualiza las tablas relacionadas
+    if dni_paciente_antiguo != dni_paciente_nuevo:
+      # Actualiza el paciente en la tabla historial_test
+      cursor.execute("""
+        UPDATE historial_test
+        SET dni_paciente = ?
+        WHERE dni_paciente IS NULL;
+      """, (dni_paciente_nuevo,))
+    # Finaliza la transacción
+    db.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Paciente actualizado correctamente'}), 200
+  except Exception as e:
+    print(f"Error al actualizar paciente: {e}")
+    # Revierte la transacción en caso de error
+    db.rollback()
+    return jsonify({'error': str(e)}), 500
+  finally:
+    cursor.close()
 
 
 def insertarTEST():
@@ -446,15 +448,15 @@ def insertarTEST():
 
 
 def insertarMOVS():
-    global validador, resultado
+  global validador, resultado
 
-    db = get_db()
-    cursor = db.cursor()
+  db = get_db()
+  cursor = db.cursor()
 
-    movimientos = resultado
+  movimientos = resultado
 
-    if not movimientos:
-        return jsonify({'error': 'Lista de movimientos vacía'}), 400
+  if not movimientos:
+    return jsonify({'error': 'Lista de movimientos vacía'}), 400
 
     for movimiento in movimientos:
         numero_tarjeta = movimiento['numero_tarjeta']
@@ -463,28 +465,28 @@ def insertarMOVS():
         categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
         id_historial = validador.idHistorial
 
-        categoria_esperada_id = asignar_categoria_numerica(categoria_esperada_id)
-        categoria_propuesta_id = asignar_categoria_numerica(categoria_propuesta_id)
+    categoria_esperada_id = asignar_categoria_numerica(categoria_esperada_id)
+    categoria_propuesta_id = asignar_categoria_numerica(categoria_propuesta_id)
 
-        cursor.execute("""
-                    INSERT INTO movimiento (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial)
-                    VALUES (?, ?, ?, ?, ?);
-                """, (numero_tarjeta, resultado2, categoria_esperada_id, categoria_propuesta_id, id_historial))
+    cursor.execute("""
+          INSERT INTO movimiento (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial)
+          VALUES (?, ?, ?, ?, ?);
+        """, (numero_tarjeta, resultado2, categoria_esperada_id, categoria_propuesta_id, id_historial))
 
-    db.commit()
-    cursor.close()
+  db.commit()
+  cursor.close()
 
 
 def asignar_categoria_numerica(categoria_textual):
-    # Mapear categorías textuales a números según el requerimiento
-    categorias = {
-        'COLOR': 1,
-        'FORMA': 2,
-        'NÚMERO': 3,
-        'OTRO': 4
-    }
-    # Retornar el número correspondiente o un valor por defecto si no se encuentra
-    return categorias.get(categoria_textual, 4)
+  # Mapear categorías textuales a números según el requerimiento
+  categorias = {
+    'COLOR': 1,
+    'FORMA': 2,
+    'NÚMERO': 3,
+    'OTRO': 4
+  }
+  # Retornar el número correspondiente o un valor por defecto si no se encuentra
+  return categorias.get(categoria_textual, 4)
 
 
 def hallarResultadosRendimiento():
@@ -546,4 +548,4 @@ def finalizarTest():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+  app.run(host='0.0.0.0', port=5000, debug=True)

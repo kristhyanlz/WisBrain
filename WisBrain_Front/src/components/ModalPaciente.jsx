@@ -54,21 +54,20 @@ const sexoOptions = [
   { key: 'Mujer', value: 'Mujer' },
 ];
 
-export default function ModalPaciente ({open, handleClose}) {
-  let fichaLocalStorage = JSON.parse(localStorage.getItem('testEnable'))
+export default function ModalPaciente ({open, onClose, dataFicha, setDataFicha}) {
+  //let dataFicha = JSON.parse(localStorage.getItem('testEnable'))
 
   const formik = useFormik({
     initialValues:{
-      dni_paciente: fichaLocalStorage.dni_paciente || '',
-      nombres: fichaLocalStorage.nombres || '',
-      ape_paterno: fichaLocalStorage.ape_paterno || '',
-      ape_materno: fichaLocalStorage.ape_materno || '',
-      sexo: fichaLocalStorage.sexo || '',
-      fecha_nacimiento: fichaLocalStorage.fecha_nacimiento ? dayjs(fichaLocalStorage.fecha_nacimiento) : null,
+      dni_paciente: dataFicha.dni_paciente || '',
+      nombres: dataFicha.nombres || '',
+      ape_paterno: dataFicha.ape_paterno || '',
+      ape_materno: dataFicha.ape_materno || '',
+      sexo: dataFicha.sexo || '',
+      fecha_nacimiento: dataFicha.fecha_nacimiento ? dayjs(dataFicha.fecha_nacimiento) : null,
       fecha_evaluacion: dayjs(),
     },
     onSubmit: async (values)=>{
-      console.log(`SUBMIT: \n${JSON.stringify(values)}`)
       toast.info('Enviando información...')
       
       let fichaJSON = JSON.stringify({
@@ -79,15 +78,17 @@ export default function ModalPaciente ({open, handleClose}) {
         sexo: values.sexo,
         fecha_nacimiento: values.fecha_nacimiento,
         edad: edadCalculada,
-        dni_paciente_antiguo: fichaLocalStorage.dni_paciente
+        dni_paciente_antiguo: dataFicha.dni_paciente
       })
+
+      console.log(`SUBMIT: \n${fichaJSON}`)
 
       try {
         
         const submitForm = await fetch(`${BACK_URL}/actualizarPaciente`, {
           method: 'PUT',
           headers: {
-            Accept: "application/json",
+            //Accept: "application/json",
             'Content-Type': 'application/json'
           },
           body: fichaJSON
@@ -106,27 +107,28 @@ export default function ModalPaciente ({open, handleClose}) {
           fichaJSON.dni_paciente = fichaJSON.dni_paciente_nuevo
           delete fichaJSON["dni_paciente_nuevo"]
           delete fichaJSON["dni_paciente_antiguo"]
-          localStorage.setItem('testEnable', JSON.stringify(fichaJSON))
+          setDataFicha(fichaJSON)
+          //localStorage.setItem('testEnable', JSON.stringify(fichaJSON))
           toast.success('Información guardada correctamente');
         }
       } catch (error) {
         toast.error('Falló la conexión con la base de datos')
       }
-      handleClose()
+      onClose()
     },
     validationSchema: FormSchema
   })
 
   const [edadCalculada, setEdadCalculada] = useState(null)
   useEffect(() => {
-    setEdadCalculada(dayjs().diff(dayjs(fichaLocalStorage.fecha_nacimiento), 'year'))
+    setEdadCalculada(dayjs().diff(dayjs(dataFicha.fecha_nacimiento), 'year'))
+
+    console.log(`DATA FICHA: ${JSON.stringify(dataFicha)}`)
   }, [])
   
   const [fechaEvaluacion, setFechaEvaluacion] = useState(dayjs())
-
-
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>
         Información del Paciente
       </DialogTitle>
@@ -278,7 +280,7 @@ export default function ModalPaciente ({open, handleClose}) {
             </FormControl>
 
             <DialogActions>
-              <Button onClick={handleClose} color="primary" variant='outlined'>
+              <Button onClick={onClose} color="primary" variant='outlined'>
                 Cancelar
               </Button>
               <Button
