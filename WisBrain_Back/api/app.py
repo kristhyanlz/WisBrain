@@ -255,26 +255,27 @@ def devolverHistorialTestPacientes():
         cursor = db.cursor()
 
         # Obtener todos los pacientes
-        cursor.execute("SELECT * FROM paciente;")
+        cursor.execute("SELECT dni_paciente, nombres, ape_paterno || ' ' || ape_materno as apellido_completo, sexo, fecha_nacimiento, edad, fecha_evaluacion FROM paciente;")
         pacientes = cursor.fetchall()
-
         response_data = []
 
         for paciente in pacientes:
             paciente_id = paciente[0]
 
             # Obtener el historial para el paciente
-            cursor.execute("SELECT * FROM historial_test WHERE id_historial = ?;", (paciente_id,))
+            cursor.execute("SELECT * FROM historial_test WHERE dni_paciente = ?;", (paciente_id,))
             historial = cursor.fetchone()
-
+            print(historial)
             if historial:
                 historial_id = historial[0]
                 print(historial_id)
 
                 # Obtener los movimientos para el historial
-                cursor.execute("SELECT numero_tarjeta, resultado, c.nombre FROM movimiento INNER JOIN categoria c ON categoria_propuesta_id = c.id WHERE id_historial = ?;", (historial_id,))
+                cursor.execute(
+                    "SELECT numero_tarjeta, resultado, c.nombre FROM movimiento INNER JOIN categoria c ON movimiento.categoria_propuesta_id = c.id WHERE movimiento.id_historial = ? ORDER BY numero_tarjeta ASC;",
+                    (historial_id,))
                 movimientos = cursor.fetchall()
-
+                print(movimientos)
                 # Estructura de datos para el paciente con su historial y movimientos
                 paciente_data = {
                     'paciente': paciente,

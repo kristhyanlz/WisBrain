@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -45,7 +45,7 @@ const columns = (handleEdit, handleDelete, handleTest) => [
     label: "NOMBRES"
   },
   {
-    name: "apelllidos",
+    name: "apellidos",
     options: { filter: false },
     label: "APELLIDOS"
   },
@@ -55,12 +55,12 @@ const columns = (handleEdit, handleDelete, handleTest) => [
     label: "SEXO"
   },
   {
-    name: "fecha de nacimiento",
+    name: "fecha_nacimiento",
     options: { filter: true },
     label: "NACIMIENTO"
   },
   {
-    name: "fecha evaluación",
+    name: "fecha_evaluacion",
     options: { filter: true },
     label: "EVALUACIÓN"
   },
@@ -82,7 +82,7 @@ const columns = (handleEdit, handleDelete, handleTest) => [
 ];
 
 const Pacientes = () => {
-  const [data, setData] = useState(dataPacientes);
+  const [data, setData] = useState([]); // Inicializamos con un array vacío
   const [open, setOpen] = useState(false);
   const [modalType, setModalType] = useState("");
   const [currentRow, setCurrentRow] = useState(null);
@@ -91,8 +91,39 @@ const Pacientes = () => {
     nombres: "",
     apellidos: "",
     sexo: "",
-    "fecha de nacimiento": "",
+    fecha_nacimiento: "",
+    fecha_evaluacion: ""
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/devolverHistorialTestPacientes');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const dataFromServer = await response.json();
+
+        // Procesar los datos recibidos para ajustarlos al formato deseado
+        const pacientes = dataFromServer.map(paciente => ({
+          dni: paciente.paciente[0],
+          nombres: paciente.paciente[1],
+          apellidos: paciente.paciente[2],
+          sexo: paciente.paciente[3],
+          fecha_nacimiento: paciente.paciente[4],
+          fecha_evaluacion: paciente.paciente[6]
+          
+        }));
+
+        setData(pacientes); // Actualizar el estado con los datos de los pacientes
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Aquí podrías manejar el error de alguna manera, por ejemplo, mostrando un mensaje al usuario
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const [showTest, setShowTest] = useState(false);
   const [buttonText, setButtonText] = useState("más detalles");
