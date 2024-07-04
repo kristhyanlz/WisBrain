@@ -95,8 +95,7 @@ def hello_world():
 @app.route('/iniciar_test', methods=['GET'])
 @cross_origin()
 def iniciar_test():
-
-  return iniciarTest()
+    return iniciarTest()
 
 
 def iniciarTest():
@@ -116,12 +115,12 @@ def iniciarTest():
 
   return jsonify({"status": "Test iniciado"}), 200
 
+
 # Endpoint para terminar el test
 @app.route('/finalizar_test', methods=['GET'])
 @cross_origin()
 def finalizar_test():
-
-  return finalizarTest()
+    return finalizarTest()
 
 
 @app.route('/getUpdate', methods=['GET'])
@@ -153,24 +152,27 @@ def resume():
 
   return jsonify({"mensaje": "se renaudo la deteccion"})
 
+
 @app.route('/devolver_resumen', methods=['GET'])
 @cross_origin()
 def devolver_resumen():
-  global validador
-  try:
-    result = {
-      "num_cat_correctas": validador.numCatCorrectas,
-      "num_err_perseverativos": validador.erroresPerseverativos,
-      "num_err_no_perseverativos": validador.erroresNoPerseverativos,
-      "num_total_errores": validador.totalErrores,
-      "porcentaje_errores_perseverativos": (validador.erroresPerseverativos / 48) * 100,
-      "fecha_test": validador.fechaEvaluacion,
-      "resultado_test": "Bueno" #la fe
-    }
+    global validador
+    try:
+        result = {
+            "num_cat_correctas": validador.numCatCorrectas,
+            "num_err_perseverativos": validador.erroresPerseverativos,
+            "num_err_no_perseverativos": validador.erroresNoPerseverativos,
+            "num_total_errores": validador.totalErrores,
+            "porcentaje_errores_perseverativos": (validador.erroresPerseverativos / 48) * 100,
+            "fecha_test": validador.fechaEvaluacion,
+            "baremos_rendimiento": validador.baremosRendimiento,
+            "baremos_flexibilidad": validador.baremosFlexibilidad
+        }
 
-    return jsonify(result), 200
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
+        return jsonify(result), 200
+    except Exception as e:
+      return jsonify({'error': str(e)}), 500
+
 
 @app.route('/insertar_paciente', methods=['POST'])
 @cross_origin()  ##ojito
@@ -215,19 +217,30 @@ def obtenerFechaActual():
   return jsonify({'fechaActual': result})
 
 
-@app.route('/insertarHistorial', methods=['POST'])
+@app.route('/insertarObservaciones', methods=['POST'])
 @cross_origin()
-def insertarHistorial():
-  try:
+def insertarObservaciones():
+    global validador
 
-    data = request.get_json()
-    observaciones = data.get('observaciones')
-    insertarTEST(observaciones)
-    insertarMOVS()
+    db = get_db()
+    cursor = db.cursor()
 
-    return jsonify({'message': 'Historial insertado correctamente'}), 200
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    try:
+
+        data = request.get_json()
+        observaciones = data.get('observaciones')
+        cursor.execute("""
+                        UPDATE historial_test
+                        SET observaciones = ?
+                        WHERE dni_paciente = ?;
+                    """, (observaciones, validador.idPaciente))
+
+        db.commit()
+        cursor.close()
+
+        return jsonify({'message': 'Observaciones insertadas correctamente'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/devolverResultadosHistorialPaciente/<dni_paciente>', methods=['GET'])
@@ -297,6 +310,7 @@ def devolverHistorialTestPacientes():
     return jsonify(response_data), 200
   except Exception as e:
     return jsonify({'error': str(e)}), 500
+
 
 @app.route('/eliminarHistorialPaciente/<dni_paciente>', methods=['DELETE'])
 @cross_origin()
@@ -402,30 +416,35 @@ def actualizarPaciente():
     cursor.close()
 
 
-def insertarTEST(observaciones):
-  global validador, resultado
-  db = get_db()
-  cursor = db.cursor()
+def insertarTEST():
+    global validador  # Suponiendo que validador es una variable global que contiene los datos necesarios
 
-  dni_paciente = validador.idPaciente
-  num_cat_correctas = validador.numCatCorrectas
-  num_err_perseverativos = validador.erroresPerseverativos
-  num_err_no_perseverativos = validador.erroresNoPerseverativos
-  num_total_errores = validador.totalErrores
-  procentaje_errores_perseverativos = (validador.erroresPerseverativos / 48) * 100
-  observaciones = observaciones
-  fecha_test = validador.fechaEvaluacion
-  resultado_test = "BUENO"
+    hallarResultadosRendimiento()
+    hallarResultadosFlexibilidad()
 
-  cursor.execute("""
-        INSERT INTO historial_test (id_historial, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
-                       num_total_errores, porcentaje_errores_perseverativos, observaciones, fecha_test, resultado_test)
+    db = get_db()
+    cursor = db.cursor()
+
+    dni_paciente = validador.idPaciente
+    num_cat_correctas = validador.numCatCorrectas
+    num_err_perseverativos = validador.erroresPerseverativos
+    num_err_no_perseverativos = validador.erroresNoPerseverativos
+    num_total_errores = validador.totalErrores
+    porcentaje_errores_perseverativos = (validador.erroresPerseverativos / 48) * 100
+    flexibilidad_cognitiva = validador.baremosFlexibilidad
+    rendimiento_cognitivo = validador.baremosRendimiento
+
+    cursor.execute("""
+        INSERT INTO historial_test 
+        (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
+         num_total_errores, porcentaje_errores_perseverativos, rendimiento_cognitivo, flexibilidad_cognitiva)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-      """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, num_total_errores,
-          procentaje_errores_perseverativos, observaciones, fecha_test, resultado_test))
-
-  db.commit()
-  cursor.close()
+    """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos,
+          num_total_errores, porcentaje_errores_perseverativos, rendimiento_cognitivo,
+          flexibilidad_cognitiva))
+    validador.idHistorial = cursor.lastrowid
+    db.commit()
+    cursor.close()
 
 
 def insertarMOVS():
@@ -439,12 +458,12 @@ def insertarMOVS():
   if not movimientos:
     return jsonify({'error': 'Lista de movimientos vacía'}), 400
 
-  for movimiento in movimientos:
-    numero_tarjeta = movimiento['numero_tarjeta']
-    resultado2 = movimiento['resultado']
-    categoria_esperada_id = movimiento['categoria']
-    categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
-    id_historial = validador.idPaciente
+    for movimiento in movimientos:
+        numero_tarjeta = movimiento['numero_tarjeta']
+        resultado2 = movimiento['resultado']
+        categoria_esperada_id = movimiento['categoria']
+        categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
+        id_historial = validador.idHistorial
 
     categoria_esperada_id = asignar_categoria_numerica(categoria_esperada_id)
     categoria_propuesta_id = asignar_categoria_numerica(categoria_propuesta_id)
@@ -457,6 +476,7 @@ def insertarMOVS():
   db.commit()
   cursor.close()
 
+
 def asignar_categoria_numerica(categoria_textual):
   # Mapear categorías textuales a números según el requerimiento
   categorias = {
@@ -468,28 +488,63 @@ def asignar_categoria_numerica(categoria_textual):
   # Retornar el número correspondiente o un valor por defecto si no se encuentra
   return categorias.get(categoria_textual, 4)
 
-def hallarResultadosCognitivosFinales():
-  pass
+
+def hallarResultadosRendimiento():
+    global validador
+    db = get_db()
+    cursor = db.cursor()
+
+    # Consulta combinada utilizando INNER JOIN
+    cursor.execute("""
+        SELECT r.nombre
+        FROM edades AS e
+        INNER JOIN baremos_rendimiento AS br ON e.id_edad = br.id_edad
+        INNER JOIN rangos AS r ON br.id_rango = r.id_rango
+        WHERE ? BETWEEN e.edad_min AND e.edad_max
+          AND ? BETWEEN br.valor_min AND br.valor_max;
+    """, (validador.edadPaciente, validador.totalErrores))
+
+    validador.baremosRendimiento  = cursor.fetchone()[0]  # Obtener el primer elemento de la tupla
+    cursor.close()
+    db.close()
 
 
+def hallarResultadosFlexibilidad():
+    global validador
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT r.nombre
+        FROM baremos_flexibilidad AS bf
+        INNER JOIN rangos AS r ON bf.id_rango = r.id_rango
+        WHERE ? BETWEEN bf.valor_min AND bf.valor_max;
+    """, (validador.totalErrores,))
+
+    validador.baremosFlexibilidad = cursor.fetchone()
+    cursor.close()
+    db.close()
 
 def finalizarTest():
-  global arduino, escucha_thread, resultado, validador
-  if arduino:
-    arduino.escucha = False
-    if escucha_thread:
-      escucha_thread.join()
-      escucha_thread = None
-      arduino = None
-      validador = None
-      # teclado_listener = None
-      resultado = []
-      escucha_thread = None
-      print("ENTRE")
-    return jsonify({"status": "Escuchador detenido"}), 200
-  else:
-    return jsonify({"error": "Arduino no inicializado"}), 400
+    global arduino, escucha_thread, resultado, validador
 
+    #Guardamos todo antes que nada
+    insertarTEST()
+    insertarMOVS()
+
+    if arduino:
+        arduino.escucha = False
+        if escucha_thread:
+            escucha_thread.join()
+            escucha_thread = None
+            arduino = None
+            validador = None
+            # teclado_listener = None
+            resultado = []
+            escucha_thread = None
+        return jsonify({"status": "Escuchador detenido"}), 200
+    else:
+        return jsonify({"error": "Arduino no inicializado"}), 400
 
 
 if __name__ == '__main__':
