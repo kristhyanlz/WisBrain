@@ -271,9 +271,13 @@ def devolverHistorialTestPacientes():
                 print(historial_id)
 
                 # Obtener los movimientos para el historial
-                cursor.execute(
-                    "SELECT numero_tarjeta, resultado, c.nombre FROM movimiento INNER JOIN categoria c ON movimiento.categoria_propuesta_id = c.id WHERE movimiento.id_historial = ? ORDER BY numero_tarjeta ASC;",
-                    (historial_id,))
+                cursor.execute("""
+                    SELECT numero_tarjeta, resultado, c.nombre 
+                    FROM movimiento 
+                    INNER JOIN categoria c ON movimiento.categoria_propuesta_id = c.id 
+                    WHERE movimiento.id_historial = ? 
+                    ORDER BY CAST(numero_tarjeta AS INTEGER) ASC;
+                """, (historial_id,))
                 movimientos = cursor.fetchall()
                 print(movimientos)
                 # Estructura de datos para el paciente con su historial y movimientos
