@@ -1,13 +1,13 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Button, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, Box, Grid } from "@mui/material";
 import MUIDataTable from "mui-datatables";
-import { dataPacientes } from "./dataPacientes";
 import { red } from "@mui/material/colors";
-import { movimientos } from "./dataMovimientos";
 import ModalPaciente from "../components/ModalPaciente";
+
+let dataFromServer
 
 const columns = (handleEdit, handleDelete, handleTest) => [
   {
@@ -56,7 +56,7 @@ const columns = (handleEdit, handleDelete, handleTest) => [
       filter: false,
       sort: false,
       empty: true,
-      setCellHeaderProps: () => ({ align: 'center' }), // Se insertó el diccionario inline para CENTRAR el texto
+      setCellHeaderProps: () => ({ align: 'center' }),
       setCellProps: () => ({ align: 'center' }),
       customBodyRender: (value, tableMeta, updateValue) => (
         <>
@@ -68,10 +68,8 @@ const columns = (handleEdit, handleDelete, handleTest) => [
   },
 ];
 
-let dataFromServer
-
 const Pacientes = () => {
-  const [data, setData] = useState([]); // Inicializamos con un array vacío
+  const [data, setData] = useState([]); 
   const [open, setOpen] = useState(false);
   const [modalType, setModalType] = useState("");
   const [currentRow, setCurrentRow] = useState(null);
@@ -86,7 +84,6 @@ const Pacientes = () => {
     fecha_evaluacion: ""
   });
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -94,13 +91,10 @@ const Pacientes = () => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const dataFromServer = await response.json();
+        dataFromServer = await response.json();
         setData(dataFromServer);
-
-        setData(dataFromServer); // Actualizar el estado con los datos de los pacientes
       } catch (error) {
         console.error('Error fetching data:', error);
-        // Aquí podrías manejar el error de alguna manera, por ejemplo, mostrando un mensaje al usuario
       }
     };
 
@@ -115,7 +109,6 @@ const Pacientes = () => {
   const handleEdit = (e, tableMeta) => {
     e.stopPropagation();
     setCurrentRow(tableMeta.rowData);
-    
     const [dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion] = tableMeta.rowData;
     setEditValues({ dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion });
     setModalType("edit");
@@ -139,8 +132,8 @@ const Pacientes = () => {
     setCurrentRow(tableMeta.rowData);
     setModalType("test");
     setOpen(true);
-    setShowTest(!showTest); // Toggle the state to show or hide the test details
-    setButtonText(showTest ? "más detalles" : "ocultar detalles"); // Update button text dynamically
+    setShowTest(!showTest); 
+    setButtonText(showTest ? "más detalles" : "ocultar detalles");
   };
 
   const renderDialog = () => {
@@ -181,16 +174,15 @@ const Pacientes = () => {
                 <Grid item>
                   <Typography fontFamily='roboto'>{currentRow[0]}</Typography>
                 </Grid>
-
                 <Grid item>
                   <Typography fontFamily='roboto'>{currentRow[5]}</Typography>
                 </Grid>
               </Grid>
               <Box mt={3}>
-                <Resultados dniCurrent={currentRow[0]}/>
+                <Resultados dniCurrent={currentRow[0]} />
               </Box>
               <Box mt={2}>
-              <Test showTest={showTest} setShowTest={setShowTest} dniCurrent={currentRow[0]} />
+                <Test showTest={showTest} setShowTest={setShowTest} dniCurrent={currentRow[0]} />
               </Box>
             </DialogContent>
             <DialogActions>
@@ -256,7 +248,7 @@ const Pacientes = () => {
 const Test = ({ showTest, setShowTest, dniCurrent }) => {
 
   const dni = dniCurrent
-  const patientData = dataFromServer.find(patient => patient.dni === dni);
+  const patientData = dataFromServer.find(patient => patient.paciente.dni_paciente === dni);
   const randomMovements = patientData.movimientos;
 
   const toggleTest = () => {
@@ -288,12 +280,12 @@ const Test = ({ showTest, setShowTest, dniCurrent }) => {
               </TableHead>
               <TableBody>
                 {randomMovements.map((row) => (
-                  <TableRow hover key={row[0]}>
-                    <TableCell align="center">{row[0]}</TableCell>
-                    <TableCell align="center" sx={row[1] === "INCORRECTO" ? { color: red[500] } : {}}>
-                      {row[1]}
+                  <TableRow hover key={row.numero_tarjeta}>
+                    <TableCell align="center">{row.numero_tarjeta}</TableCell>
+                    <TableCell align="center" sx={row.resultado === "INCORRECTO" ? { color: red[500] } : {}}>
+                      {row.resultado}
                     </TableCell>
-                    <TableCell align="center">{row[2]}</TableCell>
+                    <TableCell align="center">{row.nombre}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -312,22 +304,21 @@ const Test = ({ showTest, setShowTest, dniCurrent }) => {
   );
 };
 
-
 const Resultados = ({ dniCurrent }) => {
-
   const dni = dniCurrent;
-  const patientData = data.find(patient => patient.dni === dni);
-
+  const patientData = dataFromServer.find(patient => patient.paciente.dni_paciente === dni);
   const patientHistory = patientData.historial;
 
+  console.log(patientHistory)
+
   const rows = [
-    { calificacion: 'Número de categorías correctas', puntaje: patientHistory[2] },
-    { calificacion: 'Número de errores perseverativos', puntaje: patientHistory[3] },
-    { calificacion: 'Número de errores NO perseverativos', puntaje: patientHistory[4] },
-    { calificacion: 'Número total de errores', puntaje: patientHistory[5] },
-    { calificacion: 'Porcentaje de errores de perseverativos', puntaje: patientHistory[6] +'%' },
-    { calificacion: 'Rendimiento cognitivo', puntaje: patientHistory[8] },
-    { calificacion: 'Flexibilidad cognitiva', puntaje: patientHistory[9] },
+    { calificacion: 'Número de categorías correctas', puntaje: patientHistory.num_cat_correctas },
+    { calificacion: 'Número de errores perseverativos', puntaje: patientHistory.num_err_perseverativos },
+    { calificacion: 'Número de errores NO perseverativos', puntaje: patientHistory.num_err_no_perseverativos },
+    { calificacion: 'Número total de errores', puntaje: patientHistory.num_err_perseverativos + patientHistory.num_err_no_perseverativos },
+    { calificacion: 'Porcentaje de errores de perseverativos', puntaje: `${patientHistory.porcentaje_errores_perseverativos}%` },
+    { calificacion: 'Rendimiento cognitivo', puntaje: patientHistory.redimiento_cognitivo },
+    { calificacion: 'Flexibilidad cognitiva', puntaje: patientHistory.flexibilidad_cognitiva },
   ];
 
   const styles = {
@@ -354,8 +345,8 @@ const Resultados = ({ dniCurrent }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.calificacion}>
+            {rows.map((row, index) => (
+              <TableRow key={index}>
                 <TableCell component="th" scope="row">
                   {row.calificacion}
                 </TableCell>
@@ -374,7 +365,7 @@ const Resultados = ({ dniCurrent }) => {
           rows={5}
           variant="filled"
           fullWidth
-          value={patientHistory[7]}
+          value={patientHistory.observaciones}
         />
       </Box>
       <Grid container style={styles.button} justifyContent="center">
