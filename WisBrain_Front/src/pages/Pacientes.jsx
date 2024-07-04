@@ -2,36 +2,11 @@ import React, { useState, useEffect  } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import DescriptionIcon from '@mui/icons-material/Description';
-import {
-  Button,
-  IconButton,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
-  Container,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Paper,
-  Box,
-  Grid,
-} from "@mui/material";
+import { Button, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, Box, Grid } from "@mui/material";
 import MUIDataTable from "mui-datatables";
 import { dataPacientes } from "./dataPacientes";
 import { red } from "@mui/material/colors";
 import { movimientos } from "./dataMovimientos";
-
-const centerCols = {
-  setCellHeaderProps: () => ({ align: 'center' }),
-  setCellProps: () => ({ align: 'center' })
-};
 
 const columns = (handleEdit, handleDelete, handleTest) => [
   {
@@ -70,7 +45,8 @@ const columns = (handleEdit, handleDelete, handleTest) => [
       filter: false,
       sort: false,
       empty: true,
-      ...centerCols,
+      setCellHeaderProps: () => ({ align: 'center' }), // Se insertó el diccionario inline para CENTRAR el texto
+      setCellProps: () => ({ align: 'center' }),
       customBodyRender: (value, tableMeta, updateValue) => (
         <>
           <IconButton onClick={(e) => handleEdit(e, tableMeta)}><EditIcon /></IconButton>
