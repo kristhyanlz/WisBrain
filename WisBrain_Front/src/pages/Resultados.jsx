@@ -20,60 +20,62 @@ const rows = [
 
 const styles = {
   container: {
-    //display: 'flex',
-    //flexDirection: 'row',
-    justifyItems: 'center',
+    marginTop: 20,
+    textAlign: 'center', // Alineación central del contenido
+  },
+  obs: {
     marginTop: 20,
   },
-  obs:{
-    marginTop:20
-  },
   button: {
-    marginTop: 20
-  }
-}
+    marginTop: 20,
+  },
+  boldRow: {
+    fontWeight: 'bold',
+  },
+};
 
 export default function Resultados() {
-  console.log(JSON.stringify(rows))
   return (
     <Container maxWidth='sm' style={styles.container}>
-      <TableContainer component={Paper}  >
-        <Table >
+      <TableContainer component={Paper}>
+        <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Calificación</TableCell>
-              <TableCell align="center">Puntaje Bruto</TableCell>
+              <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Calificación</TableCell>
+              <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Resultado</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {rows.map((row, index) => (
               <TableRow
                 key={row.calificacion}
                 hover
-                //sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                sx={index >= rows.length - 2 ? styles.boldRow : {}}
               >
                 <TableCell component="th" scope="row">
-                  {row.calificacion}
+                  {index >= rows.length - 2 ? <b>{row.calificacion}</b> : row.calificacion}
                 </TableCell>
-                <TableCell align="center">{row.puntaje}</TableCell>
+                <TableCell align="center">
+                  {index >= rows.length - 2 ? <b>{row.puntaje}</b> : row.puntaje}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Box style={styles.obs} >
+      <Box style={styles.obs}>
         <TextField
-            id="filled-multiline-static"
-            label="Observaciones y comentarios"
-            multiline
-            rows={4}
-            variant="filled"
-            fullWidth
-          />
+          id="filled-multiline-static"
+          label="Observaciones y comentarios"
+          multiline
+          rows={4}
+          variant="filled"
+          fullWidth
+        />
       </Box>
       <Grid container style={styles.button} justifyContent="center">
         <Grid item>
-        <Button  variant='outlined'> Descargar PDF </Button>
+          <Button variant='outlined'> Descargar PDF </Button>
         </Grid>
       </Grid>
     </Container>

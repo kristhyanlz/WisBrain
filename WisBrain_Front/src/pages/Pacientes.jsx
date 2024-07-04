@@ -337,25 +337,34 @@ const Resultados = ({ dniCurrent }) => {
     button: {
       marginTop: 20,
     },
+    text: {
+      marginTop: '7px',
+    },
   };
 
   return (
     <Container maxWidth='sm' style={styles.container}>
       <TableContainer component={Paper}>
-        <Table aria-label="simple table">
+        <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Calificación</TableCell>
-              <TableCell align="center">Puntaje Bruto</TableCell>
+              <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Calificación</TableCell>
+              <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Resultado</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((row, index) => (
-              <TableRow key={index}>
+              <TableRow
+                key={row.calificacion}
+                hover
+                sx={index >= rows.length - 2 ? styles.boldRow : {}}
+              >
                 <TableCell component="th" scope="row">
-                  {row.calificacion}
+                  {index >= rows.length - 2 ? <b>{row.calificacion}</b> : row.calificacion}
                 </TableCell>
-                <TableCell align="center">{row.puntaje}</TableCell>
+                <TableCell align="center">
+                  {index >= rows.length - 2 ? <b>{row.puntaje}</b> : row.puntaje}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -363,19 +372,22 @@ const Resultados = ({ dniCurrent }) => {
       </TableContainer>
       <Box style={styles.obs}>
         <TextField
-          disabled
           id="filled-multiline-static"
-          label={<Typography variant="h7">Observaciones y comentarios: </Typography>}
+          label={<Typography variant="h6" >Observaciones y comentarios: </Typography>}
           multiline
           rows={5}
           variant="filled"
           fullWidth
-          value={patientHistory.observaciones}
+          value={ patientHistory.observaciones }
+          InputProps={{
+            readOnly: true,
+            style: styles.text,
+          }}
         />
       </Box>
       <Grid container style={styles.button} justifyContent="center">
         <Grid item>
-          <Button variant='outlined'>Descargar PDF</Button>
+          <Button variant='outlined'> Descargar PDF </Button>
         </Grid>
       </Grid>
     </Container>
