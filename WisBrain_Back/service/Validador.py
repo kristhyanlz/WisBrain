@@ -21,6 +21,8 @@ class Validador:
         self.fechaEvaluacion = None
         self.idHistorial = None
         self.edadPaciente = None
+        self.baremosRendimiento = None
+        self.baremosFlexibilidad = None
         self.resultado = {
             "id": 1,
             "resultado": "PENDIENTE",

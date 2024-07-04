@@ -165,7 +165,8 @@ def devolver_resumen():
             "num_total_errores": validador.totalErrores,
             "porcentaje_errores_perseverativos": (validador.erroresPerseverativos / 48) * 100,
             "fecha_test": validador.fechaEvaluacion,
-            "resultado_test": "Bueno"  #la fe
+            "baremos_rendimiento": validador.baremosRendimiento,
+            "baremos_flexibilidad": validador.baremosFlexibilidad
         }
 
         return jsonify(result), 200
@@ -216,17 +217,28 @@ def obtenerFechaActual():
     return jsonify({'fechaActual': result})
 
 
-@app.route('/insertarHistorial', methods=['POST'])
+@app.route('/insertarObservaciones', methods=['POST'])
 @cross_origin()
-def insertarHistorial():
+def insertarObservaciones():
+    global validador
+
+    db = get_db()
+    cursor = db.cursor()
+
     try:
 
         data = request.get_json()
         observaciones = data.get('observaciones')
-        insertarTEST(observaciones)
-        insertarMOVS()
+        cursor.execute("""
+                        UPDATE historial_test
+                        SET observaciones = ?
+                        WHERE dni_paciente = ?;
+                    """, (observaciones, validador.idPaciente))
 
-        return jsonify({'message': 'Historial insertado correctamente'}), 200
+        db.commit()
+        cursor.close()
+
+        return jsonify({'message': 'Observaciones insertadas correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -402,8 +414,12 @@ def actualizarPaciente():
         cursor.close()
 
 
-def insertarTEST(observaciones):
+def insertarTEST():
     global validador  # Suponiendo que validador es una variable global que contiene los datos necesarios
+
+    hallarResultadosRendimiento()
+    hallarResultadosFlexibilidad()
+
     db = get_db()
     cursor = db.cursor()
 
@@ -413,16 +429,16 @@ def insertarTEST(observaciones):
     num_err_no_perseverativos = validador.erroresNoPerseverativos
     num_total_errores = validador.totalErrores
     porcentaje_errores_perseverativos = (validador.erroresPerseverativos / 48) * 100
-    rendimiento_cognitivo = hallarResultadosRendimiento()
-    flexibilidad_cognitiva = hallarResultadosRendimiento()
+    flexibilidad_cognitiva = validador.baremosFlexibilidad
+    rendimiento_cognitivo = validador.baremosRendimiento
 
     cursor.execute("""
         INSERT INTO historial_test 
         (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
-         num_total_errores, porcentaje_errores_perseverativos, observaciones, rendimiento_cognitivo, flexibilidad_cognitiva)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+         num_total_errores, porcentaje_errores_perseverativos, rendimiento_cognitivo, flexibilidad_cognitiva)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos,
-          num_total_errores, porcentaje_errores_perseverativos, observaciones, rendimiento_cognitivo,
+          num_total_errores, porcentaje_errores_perseverativos, rendimiento_cognitivo,
           flexibilidad_cognitiva))
     validador.idHistorial = cursor.lastrowid
     db.commit()
@@ -486,12 +502,9 @@ def hallarResultadosRendimiento():
           AND ? BETWEEN br.valor_min AND br.valor_max;
     """, (validador.edadPaciente, validador.totalErrores))
 
-    resultadoRendimiento = cursor.fetchone()[0]  # Obtener el primer elemento de la tupla
-
+    validador.baremosRendimiento  = cursor.fetchone()[0]  # Obtener el primer elemento de la tupla
     cursor.close()
     db.close()
-
-    return resultadoRendimiento
 
 
 def hallarResultadosFlexibilidad():
@@ -506,16 +519,17 @@ def hallarResultadosFlexibilidad():
         WHERE ? BETWEEN bf.valor_min AND bf.valor_max;
     """, (validador.totalErrores,))
 
-    resultadoFlexibilidad = cursor.fetchone()
-
+    validador.baremosFlexibilidad = cursor.fetchone()
     cursor.close()
     db.close()
 
-    return resultadoFlexibilidad[0] if resultadoFlexibilidad else None
-
-
 def finalizarTest():
     global arduino, escucha_thread, resultado, validador
+
+    #Guardamos todo antes que nada
+    insertarTEST()
+    insertarMOVS()
+
     if arduino:
         arduino.escucha = False
         if escucha_thread:
@@ -526,7 +540,6 @@ def finalizarTest():
             # teclado_listener = None
             resultado = []
             escucha_thread = None
-            print("ENTRE")
         return jsonify({"status": "Escuchador detenido"}), 200
     else:
         return jsonify({"error": "Arduino no inicializado"}), 400
