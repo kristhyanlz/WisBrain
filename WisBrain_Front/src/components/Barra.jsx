@@ -39,7 +39,7 @@ const negrita = { fontWeight: 'bold' }
 
 const pages = [
   {text: 'Historial', link:'/Pacientes'},
-  {text: 'Ficha S.', link: '/FichaSociodemografica'},
+  {text: 'Ficha', link: '/FichaSociodemografica'},
   {text: 'Test', link: '/Test'},
   {text: 'Resultados', link:'/Resultados'},
   
