@@ -259,6 +259,36 @@ def insertarObservaciones():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/abortarTest', methods=['GET'])
+@cross_origin()
+def abortarTest():
+    global arduino, escucha_thread, resultado, validador
+
+    if validador:
+        db = get_db()
+        cursor = db.cursor()
+
+        # Eliminar al paciente
+        cursor.execute("DELETE FROM paciente WHERE dni_paciente = ?;", (validador.idPaciente,))
+
+        db.commit()
+        cursor.close()
+        validador = None
+
+    if arduino:
+        arduino.escucha = False
+        if escucha_thread:
+            escucha_thread.join()
+            escucha_thread = None
+            arduino = None
+            # teclado_listener = None
+            resultado = []
+            escucha_thread = None
+
+        return jsonify({"status": "Test abortado"}), 200
+    else:
+        return jsonify({"error": "Arduino no inicializado, pero igual el dni se borro de BD"}), 400
+
 
 @app.route('/devolverResultadosHistorialPaciente/<dni_paciente>', methods=['GET'])
 @cross_origin()
