@@ -19,6 +19,10 @@ class Validador:
         self.contadorEP = 0
         self.numCatCorrectas = 0
         self.fechaEvaluacion = None
+        self.idHistorial = None
+        self.edadPaciente = None
+        self.baremosRendimiento = None
+        self.baremosFlexibilidad = None
         self.resultado = {
             "id": 1,
             "resultado": "PENDIENTE",
