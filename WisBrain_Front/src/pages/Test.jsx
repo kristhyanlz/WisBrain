@@ -79,13 +79,14 @@ export default function Test() {
     }
   ])
 
+  const killIntervals = () => {
+    for (var i = 1; i < 99999; i++)
+      window.clearInterval(i);
+  }
+
   const [intervalRun, setIntervalRun] = useState(null)
   useEffect(() => {
 
-    const killIntervals = () => {
-      for (var i = 1; i < 99999; i++)
-        window.clearInterval(i);
-    }
 
     const interval_init = async () => {
       if (localStorage.getItem('testEnable') == 'false') {
@@ -125,8 +126,11 @@ export default function Test() {
         // Borra el local storage
         localStorage.setItem('testEnable', 'false');
 
+        
         toast.success('Se canceló el test');
-
+        
+        await killIntervals()
+        
         // Navega a la pantalla FichaSociodemografica
         navigate('/FichaSociodemografica');
 
@@ -278,7 +282,6 @@ export default function Test() {
         open={openModalLogout}
         onClose={handleCloseModalLogout}
         maxWidth='xs'
-        fullWidth
       >
         <DialogTitle>¿Desea cancelar el test?</DialogTitle>
         <DialogActions>
