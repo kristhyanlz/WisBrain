@@ -68,6 +68,26 @@ export default function Resultados() {
   const handleCloseModal = () => {
     setOpenModal(false)
   }
+  const handleClick = () => {
+    fetch('http://localhost:5000/descargar_pdf')
+      .then(response => {
+        if (response.ok) {
+          return response.blob();
+        }
+        throw new Error('Network response was not ok.');
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'archivo.pdf'; // Nombre del archivo que se descargará
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => console.error('There was a problem with the fetch operation:', error));
+  };
 
   return (
     <>
@@ -120,7 +140,7 @@ export default function Resultados() {
         </Box>
         <Grid container style={styles.button} justifyContent="center">
           <Grid item>
-            <Button variant='outlined'> Descargar PDF </Button>
+            <Button variant='outlined' onClick={handleClick}> Descargar PDF </Button>
           </Grid>
         </Grid>
       </Container>
