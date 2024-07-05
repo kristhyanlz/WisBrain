@@ -27,7 +27,7 @@ import logging
 #python -m flask --app ./WisBrain_Back/api/app.py run
 #sudo apt-get install -y python3-dev libasound2-dev
 
-ARDUINO_PORT = 'COM5'
+ARDUINO_PORT = 'COM1'
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -131,8 +131,9 @@ def get_update():
   global arduino, resultado
   #global resultado, teclado_listener, validador
 
-  resultado = arduino.resultados_validacion
+  resultado = arduino.resultados_validacion if arduino.resultados_validacion else []
   #resultado = teclado_listener.resultados_validacion
+
   return jsonify(resultado)
 
 
@@ -144,7 +145,7 @@ def resume():
     #global teclado_listener, resultado
     if len(resultado) == 48:
         finalizarTest()
-        return jsonify({"mensaje: se termino el TEST"})
+        return jsonify({"mensaje": "termino"})
 
     thread = threading.Thread(target=reproducir_audio)
     thread.start()
@@ -195,7 +196,7 @@ def insertar_paciente():
     global validador
     try:
 
-        #iniciarTest()
+        iniciarTest()
 
         db = get_db()
         cursor = db.cursor()
@@ -215,17 +216,14 @@ def insertar_paciente():
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion))
 
-        ##solo para probar
-        validador = Validador(tarjetas)
-        validador.idPaciente = dni_paciente
 
         db.commit()
         cursor.close()
         #ojito
-        '''validador.edadPaciente = edad
-    validador.fechaEvaluacion = fecha_evaluacion
-    validador.idPaciente = dni_paciente
-'''
+        validador.edadPaciente = edad
+        validador.fechaEvaluacion = fecha_evaluacion
+        validador.idPaciente = dni_paciente
+
         return jsonify({'message': 'Paciente insertado correctamente'}), 200
     except Exception as e:
 
@@ -270,8 +268,7 @@ def insertarObservaciones():
 @app.route('/abortarTest', methods=['GET'])
 @cross_origin()
 def abortarTest():
-    global validador
-    # escucha_thread, resultado, arduino
+    global validador, escucha_thread, resultado, arduino
     try:
         db = get_db()
         cursor = db.cursor()
@@ -283,7 +280,7 @@ def abortarTest():
         cursor.close()
         validador = None
 
-        '''if arduino:
+        if arduino:
             arduino.escucha = False
             if escucha_thread:
                 escucha_thread.join()
@@ -291,7 +288,7 @@ def abortarTest():
                 arduino = None
                 # teclado_listener = None
                 resultado = []
-                escucha_thread = None'''
+                escucha_thread = None
 
         return jsonify({"status": "Test abortado"}), 200
     except Exception as e:
@@ -362,7 +359,6 @@ def devolverHistorialTestPacientes():
                 response_data.append(paciente_data)
 
         cursor.close()
-        db.close()
 
         return jsonify(response_data), 200
     except Exception as e:
@@ -493,12 +489,13 @@ def insertarTEST():
     cursor.execute("""
         INSERT INTO historial_test 
         (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos, 
-         num_total_errores, porcentaje_errores_perseverativos, rendimiento_cognitivo, flexibilidad_cognitiva)
+         num_total_errores, porcentaje_errores_perseverativos, redimiento_cognitivo, flexibilidad_cognitiva)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     """, (dni_paciente, num_cat_correctas, num_err_perseverativos, num_err_no_perseverativos,
           num_total_errores, porcentaje_errores_perseverativos, rendimiento_cognitivo,
           flexibilidad_cognitiva))
     validador.idHistorial = cursor.lastrowid
+    print(validador.idHistorial)
     db.commit()
     cursor.close()
 
@@ -514,20 +511,20 @@ def insertarMOVS():
     if not movimientos:
         return jsonify({'error': 'Lista de movimientos vacía'}), 400
 
-        for movimiento in movimientos:
-            numero_tarjeta = movimiento['numero_tarjeta']
-            resultado2 = movimiento['resultado']
-            categoria_esperada_id = movimiento['categoria']
-            categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
-            id_historial = validador.idHistorial
+    for movimiento in movimientos:
+        numero_tarjeta = movimiento['id']
+        resultado2 = movimiento['resultado']
+        categoria_esperada_id = movimiento['categoria']
+        categoria_propuesta_id = movimiento['datos_tarjeta']['categoria']
+        id_historial = validador.idHistorial
 
         categoria_esperada_id = asignar_categoria_numerica(categoria_esperada_id)
         categoria_propuesta_id = asignar_categoria_numerica(categoria_propuesta_id)
 
         cursor.execute("""
-          INSERT INTO movimiento (numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id, id_historial)
+          INSERT INTO movimiento (id_historial, numero_tarjeta, resultado, categoria_esperada_id, categoria_propuesta_id)
           VALUES (?, ?, ?, ?, ?);
-        """, (numero_tarjeta, resultado2, categoria_esperada_id, categoria_propuesta_id, id_historial))
+        """, (id_historial, numero_tarjeta, resultado2, categoria_esperada_id, categoria_propuesta_id))
 
     db.commit()
     cursor.close()
@@ -536,10 +533,10 @@ def insertarMOVS():
 def asignar_categoria_numerica(categoria_textual):
     # Mapear categorías textuales a números según el requerimiento
     categorias = {
-        'COLOR': 1,
-        'FORMA': 2,
-        'NÚMERO': 3,
-        'OTRO': 4
+        'Color': 1,
+        'Forma': 2,
+        'Número': 3,
+        'Otro': 4
     }
     # Retornar el número correspondiente o un valor por defecto si no se encuentra
     return categorias.get(categoria_textual, 4)
@@ -562,7 +559,6 @@ def hallarResultadosRendimiento():
 
     validador.baremosRendimiento = cursor.fetchone()[0]  # Obtener el primer elemento de la tupla
     cursor.close()
-    db.close()
 
 
 def hallarResultadosFlexibilidad():
@@ -577,9 +573,8 @@ def hallarResultadosFlexibilidad():
         WHERE ? BETWEEN bf.valor_min AND bf.valor_max;
     """, (validador.totalErrores,))
 
-    validador.baremosFlexibilidad = cursor.fetchone()
+    validador.baremosFlexibilidad = cursor.fetchone()[0]
     cursor.close()
-    db.close()
 
 
 def finalizarTest():

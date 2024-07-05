@@ -87,7 +87,6 @@ class Validador:
         if formaPropuesta == self.formaOrdeIncorrecto and self.contadorEP >= 1:
             self.erroresPerseverativos += 1
         else:
-            self.erroresNoPerseverativos += 1
             self.contadorEP = 0
 
 
@@ -95,6 +94,7 @@ class Validador:
         if formaPropuesta is None:
             print("INCORRECTO")
             self.formaOrdeIncorrecto = formaPropuesta
+            self.erroresNoPerseverativos += 1
             return "INCORRECTO"
 
         if self.formaActualOrdenamiento == formaPropuesta:
@@ -107,7 +107,9 @@ class Validador:
         else:
             print("INCORRECTO")
             self.formaOrdeIncorrecto = formaPropuesta
+            self.erroresNoPerseverativos += 1
             self.limiteMovimientosCorrectos = 0
+
             return "INCORRECTO"
 
     def buscarSimilitud(self, pos):
