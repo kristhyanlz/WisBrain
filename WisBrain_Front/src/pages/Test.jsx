@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {useState, useEffect, useRef} from 'react'
+import {useState, useEffect, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal, Fab} from '@mui/material';
 import { red } from '@mui/material/colors';
+import { toast } from 'react-toastify';
 
 //import {movimientos} from './dataMovimientos'
 
@@ -104,6 +105,32 @@ export default function Test() {
 
     interval_init()
   }, [])
+
+  const handleLogout = async () => {
+    try {
+      // Realiza el fetch a la ruta abortarTest con el método GET
+      const response = await fetch('http://localhost:5000/abortarTest', {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        // Borra el local storage
+        localStorage.setItem('testEnable', 'false');
+        
+        // Muestra el mensaje de éxito
+        toast.success('Se abortó el test con éxito');
+        
+        // Navega a la pantalla FichaSociodemografica
+        //navigate('/FichaSociodemografica');
+
+        location.reload()
+      } else {
+        toast.error('Error al abortar el test');
+      }
+    } catch (error) {
+      toast.error('Error de conexión');
+    }
+  };
 
   const siguienteFx = () => {
     console.log("CONTINUAR")
@@ -222,7 +249,7 @@ export default function Test() {
             </TableContainer>
           </Grid>
         </Grid>
-        <Fab color="error">
+        <Fab color="error" onClick={handleLogout}>
           <LogoutIcon />
         </Fab>
       </Container>
