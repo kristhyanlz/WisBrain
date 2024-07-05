@@ -93,22 +93,36 @@ export default function Test() {
         navigate('/FichaSociodemografica')
       }
       else {
-        await killIntervals()
-        setInterval(() => {
-          fetch(`${BACK_URL}/getUpdate`)
-            .then((res) => res.json())
-            .then(async (movs) => {
-              await console.log(JSON.stringify(movs))
-              if (movs.length > 0) {
-                setMovimientos(movs)
-                if (flagPlayer < movs.length) {
-                  setFlagPlayer(movs.length)
-                  tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
+        try {
+          await killIntervals();
+      
+          setInterval(() => {
+            fetch(`${BACK_URL}/getUpdate`)
+              .then((res) => res.json())
+              .then(async (movs) => {
+                console.log(JSON.stringify(movs));
+                if (movs.mensaje === "termino") {
+                  await killIntervals();
+                  localStorage.setItem('testEnable', 'false');
+                  toast.success('Se terminó el test');
+                  navigate('/Resultados');
+                } else {
+                  if (movs.length > 0) {
+                    setMovimientos(movs);
+                    if (flagPlayer < movs.length) {
+                      setFlagPlayer(movs.length);
+                      tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }
                 }
-              }
-            })
-        }, 1000)
-        setIntervalRun(true)
+              });
+          }, 1000);
+          
+          setIntervalRun(true);
+        } catch (error) {
+          console.error('Error al obtener datos de actualización:', error);
+          toast.error('Hubo un error al obtener los datos de actualización');
+        }
       }
     }
 
@@ -146,19 +160,7 @@ export default function Test() {
     console.log("CONTINUAR");
 
     try {
-        const response = await fetch(`${BACK_URL}/resume`);
-        const data = await response.json(); // Suponiendo que la respuesta es JSON
-
-        if (data.mensaje == "termino") {
-
-          localStorage.setItem('testEnable', 'false');
-          toast.success('Se termino el test');
-          
-          await killIntervals()
-          
-          // Navega a la pantalla FichaSociodemografica
-          navigate('/Resultados');
-        }
+        await fetch(`${BACK_URL}/resume`);
     } catch (error) {
         console.error('Error al realizar el fetch:', error);
     }

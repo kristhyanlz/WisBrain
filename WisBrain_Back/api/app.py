@@ -130,8 +130,12 @@ def finalizar_test():
 def get_update():
   global arduino, resultado
   #global resultado, teclado_listener, validador
-
   resultado = arduino.resultados_validacion if arduino.resultados_validacion else []
+  if len(resultado) == 48:
+    finalizarTest()
+    return jsonify({"mensaje": "termino"})
+
+
   #resultado = teclado_listener.resultados_validacion
 
   return jsonify(resultado)
@@ -143,9 +147,6 @@ def get_update():
 def resume():
     global arduino, resultado
     #global teclado_listener, resultado
-    if len(resultado) == 48:
-        finalizarTest()
-        return jsonify({"mensaje": "termino"})
 
     thread = threading.Thread(target=reproducir_audio)
     thread.start()
@@ -365,7 +366,7 @@ def devolverHistorialTestPacientes():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/eliminarHistorialPaciente/<dni_paciente>', methods=['DELETE'])
+@app.route('/eliminarHistorialPaciente/<string:dni_paciente>', methods=['DELETE'])
 @cross_origin()
 def eliminarHistorialPaciente(dni_paciente):
     try:
@@ -373,10 +374,10 @@ def eliminarHistorialPaciente(dni_paciente):
         cursor = db.cursor()
 
         # Eliminar movimientos asociados al paciente
-        cursor.execute("DELETE FROM movimiento WHERE id_historial = ?;", (dni_paciente,))
+        cursor.execute("DELETE FROM movimiento WHERE id_historial IN (SELECT id_historial FROM historial_test WHERE dni_paciente = ?);", (dni_paciente,))
 
         # Eliminar historial del paciente
-        cursor.execute("DELETE FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
+        cursor.execute("DELETE FROM historial_test WHERE dni_paciente = ?;", (dni_paciente,))
 
         # Eliminar al paciente
         cursor.execute("DELETE FROM paciente WHERE dni_paciente = ?;", (dni_paciente,))
