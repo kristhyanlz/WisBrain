@@ -29,7 +29,7 @@ class  Arduino:
         if self.recibido[dato[0]] != estado:
             self.recibido[dato[0]] = estado
             if estado:
-                self.lock = True
+                self.lock = False
                 resultado_validacion = validador.validar({"A": 3, "B": 2, "C": 1, "D": 0}[dato[0]])
                 resultado_validacion = resultado_validacion.copy()
                 resultado_validacion['datos_tarjeta'] = resultado_validacion['datos_tarjeta'].copy()

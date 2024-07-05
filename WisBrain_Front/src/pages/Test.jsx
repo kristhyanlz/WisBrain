@@ -142,10 +142,27 @@ export default function Test() {
     }
   };
 
-  const siguienteFx = () => {
-    console.log("CONTINUAR")
-    fetch(`${BACK_URL}/resume`);
-  }
+  const siguienteFx = async () => {
+    console.log("CONTINUAR");
+
+    try {
+        const response = await fetch(`${BACK_URL}/resume`);
+        const data = await response.json(); // Suponiendo que la respuesta es JSON
+
+        if (data.mensaje == "termino") {
+
+          localStorage.setItem('testEnable', 'false');
+          toast.success('Se termino el test');
+          
+          await killIntervals()
+          
+          // Navega a la pantalla FichaSociodemografica
+          navigate('/Resultados');
+        }
+    } catch (error) {
+        console.error('Error al realizar el fetch:', error);
+    }
+};
 
   const spaceKeyListener = React.useCallback((event) => {
     if (event.key == " " && !openModal) {
