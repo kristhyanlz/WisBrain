@@ -106,7 +106,7 @@ export default function Resultados() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Calificación</TableCell>
+                <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Descripción</TableCell>
                 <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Resultado</TableCell>
               </TableRow>
             </TableHead>
