@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {useState, useEffect, useRef} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal, Fab} from '@mui/material';
+import { Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal, Fab, Zoom, Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { red } from '@mui/material/colors';
 import { toast } from 'react-toastify';
 
@@ -17,32 +17,32 @@ import BACK_URL from './backURL';
 import ModalPaciente from '../components/ModalPaciente';
 
 const styles = {
-  fichaTexto:{
+  fichaTexto: {
     fontSize: 20,
     fontFamily: 'Roboto',
     textAlign: 'center',
     paddingTop: 20,
     paddingBottom: 0,
   },
-  title:{
+  title: {
     textAlign: 'center',
     fontSize: 23,
     paddingTop: 20,
     paddingBottom: 10,
     fontFamily: 'Roboto',
   },
-  catEsperadas:{
+  catEsperadas: {
     margin: '0px 10px 20px 10px'
   },
-  cat:{
+  cat: {
     fontSize: 20
   }
 }
 
 const columns = [
-  {id: 'id', label: '# Tarjeta', align: 'center'},
-  {id: 'resultado', label: 'Respuesta', minWidth: 170, align: 'center'  },
-  {id: 'categoria', label: 'Categoría', minWidth: 100, align: 'center' },
+  { id: 'id', label: '# Tarjeta', align: 'center' },
+  { id: 'resultado', label: 'Respuesta', minWidth: 170, align: 'center' },
+  { id: 'categoria', label: 'Categoría', minWidth: 100, align: 'center' },
 ];
 
 export default function Test() {
@@ -55,6 +55,14 @@ export default function Test() {
   }
   const handleCloseModal = () => {
     setOpenModal(false)
+  }
+
+  const [openModalLogout, setOpenModalLogout] = useState(false)
+  const handleOpenModalLogout = () => {
+    setOpenModalLogout(true)
+  }
+  const handleCloseModalLogout = () => {
+    setOpenModalLogout(false)
   }
 
   const [movimientos, setMovimientos] = useState([
@@ -70,9 +78,9 @@ export default function Test() {
       "resultado": ""
     }
   ])
-  
+
   const [intervalRun, setIntervalRun] = useState(null)
-  useEffect(()=> {
+  useEffect(() => {
 
     const killIntervals = () => {
       for (var i = 1; i < 99999; i++)
@@ -80,19 +88,19 @@ export default function Test() {
     }
 
     const interval_init = async () => {
-      if (localStorage.getItem('testEnable') == 'false'){
+      if (localStorage.getItem('testEnable') == 'false') {
         navigate('/FichaSociodemografica')
       }
-      else{
+      else {
         await killIntervals()
-        setInterval( ()=> {
+        setInterval(() => {
           fetch(`${BACK_URL}/getUpdate`)
             .then((res) => res.json())
-            .then(async(movs) => {
-              await console.log(JSON.stringify(movs) )
-              if (movs.length > 0){
+            .then(async (movs) => {
+              await console.log(JSON.stringify(movs))
+              if (movs.length > 0) {
                 setMovimientos(movs)
-                if (flagPlayer < movs.length){
+                if (flagPlayer < movs.length) {
                   setFlagPlayer(movs.length)
                   tableRef.current.lastElementChild.scrollIntoView({ behavior: "smooth" })
                 }
@@ -109,21 +117,19 @@ export default function Test() {
   const handleLogout = async () => {
     try {
       // Realiza el fetch a la ruta abortarTest con el método GET
-      const response = await fetch('http://localhost:5000/abortarTest', {
+      const response = await fetch(`${BACK_URL}/abortarTest`, {
         method: 'GET',
       });
 
       if (response.ok) {
         // Borra el local storage
         localStorage.setItem('testEnable', 'false');
-        
-        // Muestra el mensaje de éxito
-        toast.success('Se abortó el test con éxito');
-        
-        // Navega a la pantalla FichaSociodemografica
-        //navigate('/FichaSociodemografica');
 
-        location.reload()
+        toast.success('Se canceló el test');
+
+        // Navega a la pantalla FichaSociodemografica
+        navigate('/FichaSociodemografica');
+
       } else {
         toast.error('Error al abortar el test');
       }
@@ -138,7 +144,7 @@ export default function Test() {
   }
 
   const spaceKeyListener = React.useCallback((event) => {
-    if (event.key == " " && !openModal){
+    if (event.key == " " && !openModal) {
       console.log(`Tecla espacio`)
       siguienteFx();
     }
@@ -167,99 +173,123 @@ export default function Test() {
 
   return (
     <>
-      <Container fixed >
-        <Box style={styles.fichaTexto}>
-          {`${fichaJSON.nombres} ${fichaJSON.ape_paterno} ${fichaJSON.ape_materno} (${fichaJSON.edad})`}
-          <Tooltip title="Editar Ficha Sociodemográfica" arrow>
-            <IconButton
-              onClick={handleOpenModal}
-            >
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        <Box style={styles.title}>
-          Categoría Esperada
-        </Box>
-        <Grid container  justifyContent='center'>
-          <Grid style={styles.catEsperadas}>
-            <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Color') ? false : true} style={styles.cat}>COLOR</Button>
-          </Grid>
-          <Grid style={styles.catEsperadas}>
-            <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Forma') ? false : true} style={styles.cat}>FORMA</Button>
-          </Grid>
-          <Grid style={styles.catEsperadas}>
-            <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Número') ? false : true} style={styles.cat}>NÚMERO</Button>
-          </Grid>
-        </Grid>
-        <Box style={{textAlign: 'center', paddingBottom: 20}}>
-          <Tooltip title="Atajo: Barra Espaciadora [SPACEBAR]" arrow>
-            <Button
-              variant='contained'
-              endIcon={<ContinuarIcon/>}
-              onClick={siguienteFx} 
-            >
-              Siguiente
-            </Button>
-          </Tooltip>
-        </Box>
+      <Grid container justifyContent="center">
+        <Grid item >
+          <Container fixed>
+            <Box style={styles.fichaTexto}>
+              {`${fichaJSON.nombres} ${fichaJSON.ape_paterno} ${fichaJSON.ape_materno} (${fichaJSON.edad})`}
+              <Tooltip title="Editar Ficha Sociodemográfica" arrow>
+                <IconButton
+                  onClick={handleOpenModal}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Box style={styles.title}>
+              Categoría Esperada
+            </Box>
+            <Grid container justifyContent='center'>
+              <Grid style={styles.catEsperadas}>
+                <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Color') ? false : true} style={styles.cat}>COLOR</Button>
+              </Grid>
+              <Grid style={styles.catEsperadas}>
+                <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Forma') ? false : true} style={styles.cat}>FORMA</Button>
+              </Grid>
+              <Grid style={styles.catEsperadas}>
+                <Button disabled={(movimientos[movimientos.length - 1].categoria == 'Número') ? false : true} style={styles.cat}>NÚMERO</Button>
+              </Grid>
+            </Grid>
+            <Box style={{ textAlign: 'center', paddingBottom: 20 }}>
+              <Tooltip title="Atajo: Barra Espaciadora [SPACEBAR]" arrow>
+                <Button
+                  variant='contained'
+                  endIcon={<ContinuarIcon />}
+                  onClick={siguienteFx}
+                >
+                  Siguiente
+                </Button>
+              </Tooltip>
+            </Box>
 
-        <Grid container justifyContent="center">
-          <Grid item>
-            <TableContainer sx={{ maxHeight: 440, minWidth:600 }} ref={tableRef}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                
-                <TableBody>
-                  {
-                  movimientos.map((row) => {
-                      return (
-                        <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                        {
-                          columns.map((column) => {
-                            const value = (column.id == 'categoria')? row.datos_tarjeta.categoria :row[column.id];
-                            let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
-                            return (
-                              <TableCell key={column.id} align={column.align}>
-                                <Box sx={es_incorrecto && {color:red[500]}}>
-                                  {value}
-                                </Box>
-                              </TableCell>
-                            );
-                          })
-                        }
-                        </TableRow>
-                      );
-                    })
-                  }
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
+            <Grid container justifyContent="center">
+              <Grid item>
+                <TableContainer sx={{ maxHeight: 440, minWidth: 600 }} ref={tableRef}>
+                  <Table stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        {columns.map((column) => (
+                          <TableCell
+                            key={column.id}
+                            align={column.align}
+                            style={{ minWidth: column.minWidth }}
+                          >
+                            {column.label}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                      {
+                        movimientos.map((row) => {
+                          return (
+                            <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                              {
+                                columns.map((column) => {
+                                  const value = (column.id == 'categoria') ? row.datos_tarjeta.categoria : row[column.id];
+                                  let es_incorrecto = ((column.id == 'resultado') && (row.resultado == 'INCORRECTO')) ? true : false
+                                  return (
+                                    <TableCell key={column.id} align={column.align}>
+                                      <Box sx={es_incorrecto && { color: red[500] }}>
+                                        {value}
+                                      </Box>
+                                    </TableCell>
+                                  );
+                                })
+                              }
+                            </TableRow>
+                          );
+                        })
+                      }
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Grid>
+
+            </Grid>
+          </Container>
         </Grid>
-        <Fab color="error" onClick={handleLogout}>
-          <LogoutIcon />
-        </Fab>
-      </Container>
-      
-      <ModalPaciente 
-        open={openModal} 
-        onClose={handleCloseModal} 
+        <Grid item>
+          <Zoom in={true} sx={{ marginTop: 55, marginLeft: 10 }}>
+            <Fab color="primary" onClick={handleOpenModalLogout}>
+              <LogoutIcon />
+            </Fab>
+          </Zoom>
+        </Grid>
+      </Grid>
+      <ModalPaciente
+        open={openModal}
+        onClose={handleCloseModal}
         dataFicha={JSON.parse(localStorage.getItem('testEnable'))}
         setDataFicha={(data) => localStorage.setItem('testEnable', JSON.stringify(data))}
       />
+      <Dialog
+        open={openModalLogout}
+        onClose={handleCloseModalLogout}
+        maxWidth='xs'
+        fullWidth
+      >
+        <DialogTitle>¿Desea cancelar el test?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleCloseModalLogout} color="primary">
+            No
+          </Button>
+          <Button onClick={handleLogout} color="primary" autoFocus>
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
