@@ -14,42 +14,66 @@ let dataFromServer
 const columns = (handleEdit, handleDelete, handleTest) => [
   {
     name: "dni_paciente",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "DNI"
   },
   {
     name: "nombres",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "NOMBRES"
   },
   {
     name: "ape_paterno",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "APELLIDO PATERNO"
   },
   {
     name: "ape_materno",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "APELLIDO MATERNO"
   },
   {
     name: "sexo",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "SEXO"
   },
   {
     name: "fecha_nacimiento",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "NACIMIENTO"
   },
   {
     name: "edad",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "EDAD"
   },
   {
     name: "fecha_evaluacion",
-    options: { filter: true },
+    options: { 
+      filter: true,
+      setCellProps: () => ({ align: 'center' }),
+    },
     label: "EVALUACIÓN"
   },
   {

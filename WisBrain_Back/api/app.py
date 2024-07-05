@@ -362,15 +362,22 @@ def devolverResultadosHistorialPaciente(dni_paciente):
         db = get_db()
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
-        historial_tests = cursor.fetchall()
+        cursor.execute("SELECT * FROM historial_test WHERE dni_paciente = ?;", (dni_paciente,))
+        historial_test = cursor.fetchone()
+
+        # Obtener los nombres de las columnas
+        column_names = [description[0] for description in cursor.description]
 
         cursor.close()
 
-        return jsonify(historial_tests), 200
+        # Convertir el resultado a un diccionario
+        if historial_test:
+            historial_test_dict = dict(zip(column_names, historial_test))
+            return jsonify(historial_test_dict), 200
+        else:
+            return jsonify({'error': 'No se encontró el historial para el paciente con DNI {}'.format(dni_paciente)}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/devolverHistorialTestPacientes', methods=['GET'])
 @cross_origin()
