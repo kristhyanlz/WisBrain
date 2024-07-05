@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useState, useEffect, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
-import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal, Fab} from '@mui/material';
+import {Grid, Button, Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, IconButton, Modal, Fab, Zoom} from '@mui/material';
 import { red } from '@mui/material/colors';
 import { toast } from 'react-toastify';
 
@@ -109,7 +109,7 @@ export default function Test() {
   const handleLogout = async () => {
     try {
       // Realiza el fetch a la ruta abortarTest con el método GET
-      const response = await fetch('http://localhost:5000/abortarTest', {
+      const response = await fetch(`${BACK_URL}/abortarTest`, {
         method: 'GET',
       });
 
@@ -118,12 +118,12 @@ export default function Test() {
         localStorage.setItem('testEnable', 'false');
         
         // Muestra el mensaje de éxito
-        toast.success('Se abortó el test con éxito');
+        toast.success('Se canceló el test');
         
         // Navega a la pantalla FichaSociodemografica
-        //navigate('/FichaSociodemografica');
+        navigate('/FichaSociodemografica');
 
-        location.reload()
+        //location.reload()
       } else {
         toast.error('Error al abortar el test');
       }
@@ -248,10 +248,14 @@ export default function Test() {
               </Table>
             </TableContainer>
           </Grid>
+          <Grid item>
+            <Zoom in={true} sx={{marginTop:35, marginLeft:10}}>
+              <Fab color="primary" onClick={handleLogout}>
+                <LogoutIcon />
+              </Fab>
+            </Zoom>
+          </Grid>
         </Grid>
-        <Fab color="error" onClick={handleLogout}>
-          <LogoutIcon />
-        </Fab>
       </Container>
       
       <ModalPaciente 
