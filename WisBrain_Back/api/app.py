@@ -124,21 +124,19 @@ def finalizar_test():
     return finalizarTest()
 
 
-
 @app.route('/getUpdate', methods=['GET'])
 @cross_origin()
 def get_update():
-  global arduino, resultado
-  #global resultado, teclado_listener, validador
-  resultado = arduino.resultados_validacion if arduino.resultados_validacion else []
-  if len(resultado) == 48:
-    finalizarTest()
-    return jsonify({"mensaje": "termino"})
+    global arduino, resultado
+    #global resultado, teclado_listener, validador
+    resultado = arduino.resultados_validacion if arduino.resultados_validacion else []
+    if len(resultado) == 48:
+        finalizarTest()
+        return jsonify({"mensaje": "termino"})
 
+    #resultado = teclado_listener.resultados_validacion
 
-  #resultado = teclado_listener.resultados_validacion
-
-  return jsonify(resultado)
+    return jsonify(resultado)
 
 
 # Podria ser a al revez.
@@ -158,17 +156,78 @@ def resume():
 
 
 @app.route('/descargar_pdf', methods=['GET'])
+@cross_origin()
 def descargar_pdf():
+    # Datos predeterminados
+    dni = "74859625"
+    nombres_apellidos = "Carlos Mamani"
+    fecha_test = "1961-12-14(63)"
+    resultados = {
+        "num_cat_correctas": 0,
+        "num_err_perseverativos": 6,
+        "num_err_no_perseverativos": 42,
+        "num_total_errores": 48,
+        "porcentaje_errores_perseverativos": 12.5,
+        "rendimiento_cognitivo": "Bajo",
+        "flexibilidad_cognitiva": "Baja"
+    }
+    observaciones = "Se observo que el paciente se pone muy nervioso durante la sesión y más aun cuando no sabe por que es INCORRECTO"
+    movimientos = [
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "CORRECTO", "categoria": "NÚMERO"},
+        {"respuesta": "INCORRECTO", "categoria": "FORMA"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "COLOR"},
+        {"respuesta": "INCORRECTO", "categoria": "OTRO"},
+    ]
+
     # Generar el PDF utilizando la función separada
-    pdf_buffer = generate_pdf()
+    pdf_buffer = generate_pdf(dni, nombres_apellidos, fecha_test, resultados, observaciones, movimientos)
 
     # Devolver el PDF como una descarga
-    return send_file(pdf_buffer, as_attachment=True, download_name='ejemplo.pdf', mimetype='application/pdf')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
+    return send_file(pdf_buffer, as_attachment=True, download_name='resumen.pdf', mimetype='application/pdf')
 
 @app.route('/devolver_resumen', methods=['GET'])
 @cross_origin()
@@ -216,7 +275,6 @@ def insertar_paciente():
       INSERT INTO paciente (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     """, (dni_paciente, nombres, ape_paterno, ape_materno, sexo, fecha_nacimiento, edad, fecha_evaluacion))
-
 
         db.commit()
         cursor.close()
@@ -374,7 +432,9 @@ def eliminarHistorialPaciente(dni_paciente):
         cursor = db.cursor()
 
         # Eliminar movimientos asociados al paciente
-        cursor.execute("DELETE FROM movimiento WHERE id_historial IN (SELECT id_historial FROM historial_test WHERE dni_paciente = ?);", (dni_paciente,))
+        cursor.execute(
+            "DELETE FROM movimiento WHERE id_historial IN (SELECT id_historial FROM historial_test WHERE dni_paciente = ?);",
+            (dni_paciente,))
 
         # Eliminar historial del paciente
         cursor.execute("DELETE FROM historial_test WHERE dni_paciente = ?;", (dni_paciente,))
