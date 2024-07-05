@@ -130,8 +130,12 @@ def finalizar_test():
 def get_update():
   global arduino, resultado
   #global resultado, teclado_listener, validador
-
   resultado = arduino.resultados_validacion if arduino.resultados_validacion else []
+  if len(resultado) == 48:
+    finalizarTest()
+    return jsonify({"mensaje": "termino"})
+
+
   #resultado = teclado_listener.resultados_validacion
 
   return jsonify(resultado)
@@ -143,9 +147,6 @@ def get_update():
 def resume():
     global arduino, resultado
     #global teclado_listener, resultado
-    if len(resultado) == 48:
-        finalizarTest()
-        return jsonify({"mensaje": "termino"})
 
     thread = threading.Thread(target=reproducir_audio)
     thread.start()
