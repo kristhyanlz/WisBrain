@@ -365,7 +365,7 @@ def devolverHistorialTestPacientes():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/eliminarHistorialPaciente/<dni_paciente>', methods=['DELETE'])
+@app.route('/eliminarHistorialPaciente/<string:dni_paciente>', methods=['DELETE'])
 @cross_origin()
 def eliminarHistorialPaciente(dni_paciente):
     try:
@@ -373,10 +373,10 @@ def eliminarHistorialPaciente(dni_paciente):
         cursor = db.cursor()
 
         # Eliminar movimientos asociados al paciente
-        cursor.execute("DELETE FROM movimiento WHERE id_historial = ?;", (dni_paciente,))
+        cursor.execute("DELETE FROM movimiento WHERE id_historial IN (SELECT id_historial FROM historial_test WHERE dni_paciente = ?);", (dni_paciente,))
 
         # Eliminar historial del paciente
-        cursor.execute("DELETE FROM historial_test WHERE id_historial = ?;", (dni_paciente,))
+        cursor.execute("DELETE FROM historial_test WHERE dni_paciente = ?;", (dni_paciente,))
 
         # Eliminar al paciente
         cursor.execute("DELETE FROM paciente WHERE dni_paciente = ?;", (dni_paciente,))

@@ -7,6 +7,8 @@ import MUIDataTable from "mui-datatables";
 import { red } from "@mui/material/colors";
 import ModalPaciente from "../components/ModalPaciente";
 
+import { toast } from 'react-toastify';
+
 let dataFromServer
 
 const columns = (handleEdit, handleDelete, handleTest) => [
@@ -71,6 +73,7 @@ const columns = (handleEdit, handleDelete, handleTest) => [
 const Pacientes = () => {
   const [data, setData] = useState([]); 
   const [open, setOpen] = useState(false);
+  const [rowsToDelete, setRowsToDelete] = useState([]);
   const [modalType, setModalType] = useState("");
   const [currentRow, setCurrentRow] = useState(null);
   const [editValues, setEditValues] = useState({
@@ -108,8 +111,38 @@ const Pacientes = () => {
 
   const handleCloseModalUpdate = () => {
     setOpen(false);
-    fetchData();
+    //fetchData();
   }
+
+  const handleDeleteAction = async () => {
+    setOpen(false);
+    try {
+      for (const element of rowsToDelete) {
+        const reg = data[element.dataIndex];
+        console.log(reg);
+
+        const response = await fetch(`http://localhost:5000/eliminarHistorialPaciente/${reg.paciente.dni_paciente}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
+
+        const result = await response.json();
+        console.log(result);
+
+        if (response.ok) {
+          toast.success(`Historiales eliminados`);
+          await fetchData();
+        } else {
+          throw new Error(result.error || 'Error desconocido');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(`Hubo un error al intentar eliminar el historial del paciente`);
+    }
+  };
 
   const handleEdit = (e, tableMeta) => {
     e.stopPropagation();
@@ -128,8 +161,8 @@ const Pacientes = () => {
   };
 
   const handleConfirmDelete = () => {
-    setData(data.filter((row) => row !== currentRow));
-    handleClose();
+    handleDeleteAction();
+    fetchData();
   };
 
   const handleTest = (e, tableMeta) => {
@@ -146,15 +179,15 @@ const Pacientes = () => {
       case "delete":
         return (
           <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Confirmar Eliminación</DialogTitle>
-            <DialogContent>
-              <DialogContentText>¿Estás seguro?</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose}>Cancelar</Button>
-              <Button onClick={handleConfirmDelete} color="error">Eliminar</Button>
-            </DialogActions>
-          </Dialog>
+          <DialogTitle>Confirmar Eliminación</DialogTitle>
+          <DialogContent>
+            <DialogContentText>¿Estás seguro de eliminar los historiales seleccionados?</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button onClick={handleConfirmDelete} color="error">Eliminar</Button>
+          </DialogActions>
+        </Dialog>
         );
       case "edit":
         return (  
@@ -230,10 +263,11 @@ const Pacientes = () => {
       },
     },
     onChangePage: (currentPage) => console.log("currentPage: ", currentPage),
-    onRowsDelete: (rowsDeleted) => {
-      console.log("rowsDeleted: ", rowsDeleted)
-      setModalType("delete");
-      setOpen(true);
+    onRowsDelete: async (rowsDeleted) => {
+      console.log("rowsDeleted: ", rowsDeleted);
+    setRowsToDelete(rowsDeleted.data);
+    setModalType("delete");
+    setOpen(true);
     },
   };
 
